@@ -9,9 +9,54 @@
       content="MediVerse — one platform for appointments, doctors, bed availability, medication tracking, vaccination alerts, and hospital campaigns."
     />
     <title>MediVerse | Unified Hospital Services</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mediverse-theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      Static, hidden duplicate of the React support form so Netlify's build-time
+      bot can detect it in the raw HTML (it never sees the JS-rendered version).
+      The live form in src/pages/Support.jsx submits to this same form name.
+    -->
+    <form name="support" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <select name="category">
+        <option>Technical issue / bug</option>
+        <option>Appointment problem</option>
+        <option>Doctor or bed information</option>
+        <option>Medication or vaccination records</option>
+        <option>Account issue</option>
+        <option>Other</option>
+      </select>
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
+    <!-- Same reasoning as the support form above, for Emergency's ambulance-request form. -->
+    <form name="emergency" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="phone" />
+      <input type="text" name="name" />
+      <input type="text" name="area" />
+      <textarea name="details"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

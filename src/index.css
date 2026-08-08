@@ -11,10 +11,17 @@
   --border: rgba(11, 11, 11, 0.1);
   --gridline: #e1e0d9;
 
-  --brand: #2a78d6;
-  --brand-strong: #184f95;
-  --brand-soft: #cde2fb;
-  --brand-soft-2: #eaf2fc;
+  /* Clinical Aurora — light theme identity */
+  --brand: #1c7a72;
+  --brand-strong: #0f3d38;
+  --brand-soft: #cdece6;
+  --brand-soft-2: #e4f2f0;
+  --brand-on: #ffffff;
+  --body-bg:
+    radial-gradient(640px 420px at 10% 0%, rgba(59, 178, 163, 0.16), transparent 60%),
+    radial-gradient(680px 460px at 92% 10%, rgba(84, 130, 217, 0.14), transparent 60%),
+    radial-gradient(520px 380px at 75% 100%, rgba(255, 175, 140, 0.10), transparent 65%),
+    var(--surface-2);
 
   --status-good: #0ca30c;
   --status-warning: #fab219;
@@ -22,6 +29,10 @@
   --status-critical: #d03b3b;
 
   --success-text: #006300;
+
+  /* Homepage hero banner — deliberately stays a rich, dark gradient in both
+     themes (like a promo banner), so its text is always white regardless. */
+  --hero-banner-bg: linear-gradient(135deg, #14615c 0%, #175f8f 55%, #2a4a86 100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,10 +47,17 @@
     --border: rgba(255, 255, 255, 0.1);
     --gridline: #2c2c2a;
 
-    --brand: #3987e5;
-    --brand-strong: #86b6ef;
-    --brand-soft: #184f95;
-    --brand-soft-2: #14324f;
+    /* Deep Care — dark theme identity */
+    --brand: #4fd1c0;
+    --brand-strong: #bfe9e0;
+    --brand-soft: #1c2d2b;
+    --brand-soft-2: #14302c;
+    --brand-on: #062521;
+    --body-bg:
+      radial-gradient(680px 460px at 88% 0%, rgba(79, 209, 192, 0.16), transparent 60%),
+      radial-gradient(520px 380px at 5% 100%, rgba(84, 130, 217, 0.14), transparent 60%),
+      linear-gradient(160deg, #0b1f2b 0%, #0f2a30 45%, #0a1a22 100%);
+    --hero-banner-bg: linear-gradient(135deg, #0f2e2b 0%, #123a3a 45%, #17324f 100%);
 
     --success-text: #0ca30c;
   }
@@ -56,10 +74,17 @@
   --border: rgba(255, 255, 255, 0.1);
   --gridline: #2c2c2a;
 
-  --brand: #3987e5;
-  --brand-strong: #86b6ef;
-  --brand-soft: #184f95;
-  --brand-soft-2: #14324f;
+  /* Deep Care — dark theme identity */
+  --brand: #4fd1c0;
+  --brand-strong: #bfe9e0;
+  --brand-soft: #1c2d2b;
+  --brand-soft-2: #14302c;
+  --brand-on: #062521;
+  --body-bg:
+    radial-gradient(680px 460px at 88% 0%, rgba(79, 209, 192, 0.16), transparent 60%),
+    radial-gradient(520px 380px at 5% 100%, rgba(84, 130, 217, 0.14), transparent 60%),
+    linear-gradient(160deg, #0b1f2b 0%, #0f2a30 45%, #0a1a22 100%);
+  --hero-banner-bg: linear-gradient(135deg, #0f2e2b 0%, #123a3a 45%, #17324f 100%);
 
   --success-text: #0ca30c;
 }
@@ -76,10 +101,28 @@ body,
 
 body {
   margin: 0;
-  background: var(--surface-2);
+  background: var(--body-bg);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+
+  /* Site-wide: no click-drag/double-click text selection, and no iOS
+     long-press "Copy" callout. Form fields opt back in below — you still
+     need to select text to edit it. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
 }
 
 a {
@@ -91,6 +134,145 @@ a {
   background: var(--surface-card);
   border: 1px solid var(--border);
   border-radius: 16px;
+}
+
+/* ---------------------------------------------------------------
+   Interactive "pop" — buttons and pill/rounded links lift and grow
+   slightly on hover, and press in on click. Scoped to elements that
+   carry a rounded-* utility so full-width list rows, accordion
+   headers and invisible modal backdrops are left alone. Opt out
+   anywhere with `no-pop`.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  button[class*="rounded-"]:not(:disabled):not(.no-pop),
+  a[class*="rounded-"]:not(.no-pop) {
+    transition:
+      transform 0.18s cubic-bezier(0.34, 1.4, 0.64, 1),
+      box-shadow 0.18s ease,
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  button[class*="rounded-"]:not(:disabled):not(.no-pop):hover,
+  a[class*="rounded-"]:not(.no-pop):hover,
+  button[class*="rounded-"]:not(:disabled):not(.no-pop):focus-visible,
+  a[class*="rounded-"]:not(.no-pop):focus-visible {
+    transform: translateY(-2px) scale(1.045);
+    box-shadow: 0 10px 22px -10px rgba(8, 30, 30, 0.45);
+  }
+
+  button[class*="rounded-"]:not(:disabled):not(.no-pop):active,
+  a[class*="rounded-"]:not(.no-pop):active {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.08s;
+  }
+
+  /* A full-width button growing 4.5% shifts its edges a long way, so
+     wide targets get a gentler nudge than small pills do. */
+  button[class*="w-full"][class*="rounded-"]:not(:disabled):not(.no-pop):hover,
+  a[class*="w-full"][class*="rounded-"]:not(.no-pop):hover,
+  button[class*="w-full"][class*="rounded-"]:not(:disabled):not(.no-pop):focus-visible,
+  a[class*="w-full"][class*="rounded-"]:not(.no-pop):focus-visible {
+    transform: translateY(-2px) scale(1.015);
+  }
+
+  /* Whole-card targets (feature tiles, doctor cards) lift rather than
+     grow — scaling a large surface reads as a glitch, not a nudge. */
+  a.card,
+  button.card {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  a.card:hover,
+  button.card:hover,
+  a.card:focus-visible,
+  button.card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px -16px rgba(8, 30, 30, 0.45);
+    border-color: color-mix(in srgb, var(--brand) 40%, var(--border));
+  }
+  a.card:active,
+  button.card:active {
+    transform: translateY(-1px);
+    transition-duration: 0.08s;
+  }
+}
+
+/* Motion-sensitive users still get a clear hover cue, just no movement. */
+@media (prefers-reduced-motion: reduce) {
+  button[class*="rounded-"]:not(:disabled):hover,
+  a[class*="rounded-"]:hover,
+  a.card:hover,
+  button.card:hover {
+    box-shadow: 0 10px 22px -10px rgba(8, 30, 30, 0.45);
+  }
+}
+
+@keyframes search-flash {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.search-flash-term {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--brand);
+  animation: search-flash 2.2s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-flash-term {
+    animation: none;
+  }
+}
+
+.hero-banner {
+  background: var(--hero-banner-bg);
+  isolation: isolate;
+}
+.hero-banner-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(420px 280px at 12% 15%, rgba(255, 255, 255, 0.14), transparent 65%),
+    radial-gradient(360px 260px at 88% 85%, rgba(255, 255, 255, 0.10), transparent 65%);
+}
+
+.mail-cta {
+  color: var(--brand);
+  background: var(--brand-soft-2);
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.mail-cta:hover,
+.mail-cta:focus-visible {
+  background: var(--brand);
+  color: var(--brand-on);
+  border-color: var(--brand);
+}
+
+.footer-mail {
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+.footer-mail:hover,
+.footer-mail:focus-visible {
+  color: var(--brand);
 }
 
 .meter-track {

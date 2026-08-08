@@ -1,8 +1,12 @@
-import { useMemo, useState } from 'react'
-import { Search, Star, Clock } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Search, Star, Clock, MapPin } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import Badge from '../components/Badge'
-import { doctors, departments } from '../data/mock'
+import DoctorProfileModal from '../components/DoctorProfileModal'
+import DoctorDataNotice from '../components/DoctorDataNotice'
+import { departments } from '../data/mock'
+import { useDirectory } from '../context/AdminContext'
 
 const STATUS_MAP = {
   available: { variant: 'good', label: 'Available' },
@@ -11,8 +15,18 @@ const STATUS_MAP = {
 }
 
 export default function Doctors() {
-  const [query, setQuery] = useState('')
+  const { doctors } = useDirectory() // admin hides/edits applied
+  const [searchParams] = useSearchParams()
+  const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [department, setDepartment] = useState('All')
+  const [activeDoctor, setActiveDoctor] = useState(null)
+
+  // A search from the homepage arrives as ?q=... — pick it up if the user
+  // lands here again with a new query param (e.g. clicking another result).
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q !== null) setQuery(q)
+  }, [searchParams])
 
   const filtered = useMemo(() => {
     return doctors.filter((d) => {
@@ -20,17 +34,19 @@ export default function Doctors() {
       const matchesQuery = d.name.toLowerCase().includes(query.toLowerCase()) || d.specialty.toLowerCase().includes(query.toLowerCase())
       return matchesDept && matchesQuery
     })
-  }, [query, department])
+  }, [query, department, doctors])
 
   return (
     <>
       <PageHeader
         eyebrow="Doctor Information"
         title="Find the right specialist"
-        description="Browse by department, check experience and live availability before you book."
+        description="Browse by department, check experience and live availability before you book. Tap a doctor for their full profile."
       />
 
       <div className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
+        <DoctorDataNotice className="mb-5" />
+
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -66,7 +82,12 @@ export default function Doctors() {
             {filtered.map((d) => {
               const s = STATUS_MAP[d.status]
               return (
-                <div key={d.id} className="card flex flex-col gap-3 p-5">
+                <button
+                  type="button"
+                  key={d.id}
+                  onClick={() => setActiveDoctor(d)}
+                  className="card flex flex-col gap-3 p-5 text-left"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div
                       className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold"
@@ -81,11 +102,23 @@ export default function Doctors() {
                     <Badge variant={s.variant}>{s.label}</Badge>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    <h3 className="flex items-center gap-1.5 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {d.name}
+                      {d.featured && (
+                        <span
+                          className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                          style={{ color: '#c2447a', background: 'color-mix(in srgb, #c2447a 14%, transparent)' }}
+                        >
+                          Featured
+                        </span>
+                      )}
                     </h3>
                     <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {d.specialty} &middot; {d.experience} yrs experience
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <MapPin size={11} /> {d.state}
+                      {d.availableNationwide ? ' · nationwide' : ''}
                     </p>
                   </div>
                   <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -97,12 +130,14 @@ export default function Doctors() {
                       <Clock size={13} /> {d.nextSlot}
                     </span>
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>
         )}
       </div>
+
+      {activeDoctor && <DoctorProfileModal doctor={activeDoctor} onClose={() => setActiveDoctor(null)} />}
     </>
   )
 }

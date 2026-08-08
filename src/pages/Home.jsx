@@ -6,134 +6,179 @@ import {
   Pill,
   Syringe,
   Megaphone,
+  Siren,
+  Award,
+  Building2,
   ArrowRight,
 } from 'lucide-react'
-import { bedStats } from '../data/mock'
+import SearchBar from '../components/SearchBar'
+import { bedStats, departments, campaigns } from '../data/mock'
+import { useDirectory } from '../context/AdminContext'
 
-const features = [
+const tiles = [
   {
     to: '/appointments',
     icon: CalendarCheck,
-    title: 'Appointment Scheduling',
-    description: 'Book, reschedule, and track visits with any department in a few taps.',
+    title: 'Book Appointment',
+    tagline: 'Confirmed in seconds',
+    color: '#1c7a72',
   },
   {
     to: '/doctors',
     icon: Stethoscope,
-    title: 'Doctor Information',
-    description: 'Browse specialists, experience, ratings, and real-time availability.',
+    title: 'Find a Doctor',
+    tagline: `${departments.length} departments`,
+    color: '#2a78d6',
   },
   {
     to: '/beds',
     icon: BedDouble,
     title: 'Bed Availability',
-    description: 'Live occupancy across ICU, general, maternity, and emergency wards.',
+    tagline: 'Live occupancy',
+    color: '#7a5af8',
   },
   {
     to: '/medications',
     icon: Pill,
-    title: 'Medication Tracking',
-    description: 'Stay on schedule with dosage reminders and refill counts.',
+    title: 'Medication Tracker',
+    tagline: 'Never miss a dose',
+    color: '#c98500',
   },
   {
     to: '/vaccinations',
     icon: Syringe,
     title: 'Vaccination Alerts',
-    description: 'Never miss a due date — overdue, upcoming, and scheduled at a glance.',
+    tagline: 'Stay up to date',
+    color: '#ec835a',
   },
   {
     to: '/campaigns',
     icon: Megaphone,
-    title: 'Healthcare Campaigns',
-    description: 'Community drives, screenings, and awareness programs near you.',
+    title: 'Campaigns',
+    tagline: 'Free community drives',
+    color: '#2f8f4e',
+  },
+  {
+    to: '/emergency',
+    icon: Siren,
+    title: 'Emergency Care',
+    tagline: 'Ambulance to your area',
+    color: '#d03b3b',
+  },
+  {
+    to: '/specialists',
+    icon: Award,
+    title: 'Top Specialists',
+    tagline: 'By state & specialty',
+    color: '#c2447a',
+  },
+  {
+    to: '/hospitals',
+    icon: Building2,
+    title: 'Nearby Hospitals',
+    // Filled in at render — the count moves when an admin hides a hospital.
+    tagline: null,
+    color: '#0e7490',
   },
 ]
 
 export default function Home() {
+  const { hospitals, doctors } = useDirectory()
   const totalBeds = bedStats.reduce((a, b) => a + b.total, 0)
   const freeBeds = bedStats.reduce((a, b) => a + (b.total - b.occupied), 0)
+  const nextCampaign = campaigns[0]
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-4 pb-12 pt-14 sm:px-6 sm:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
-            style={{ color: 'var(--brand)', background: 'var(--brand-soft-2)' }}
-          >
-            One platform, every hospital service
-          </span>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl" style={{ color: 'var(--text-primary)' }}>
-            Hospital services,{' '}
-            <span style={{ color: 'var(--brand)' }}>unified</span> in one place
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base sm:text-lg" style={{ color: 'var(--text-secondary)' }}>
-            MediVerse centralises appointments, doctor information, bed availability, medication tracking,
-            vaccination alerts, and healthcare campaigns — replacing fragmented, time-consuming access with a
-            single streamlined interface.
-          </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/appointments"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
-              style={{ background: 'var(--brand)' }}
-            >
-              Book an appointment <ArrowRight size={16} />
-            </Link>
-            <Link
-              to="/beds"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-black/5"
-              style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-            >
-              Check bed availability
-            </Link>
+      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-10">
+        <div className="hero-banner relative overflow-hidden rounded-3xl px-5 py-10 sm:px-10 sm:py-14">
+          <div className="hero-banner-glow" aria-hidden="true" />
+          <div className="relative mx-auto max-w-2xl text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white/90 ring-1 ring-white/25">
+              One Platform, Every Healthcare You Need
+            </span>
+            <h1 className="mt-4 text-3xl font-semibold leading-tight text-white sm:text-5xl">
+              Hospital care, <span className="whitespace-nowrap">one search away</span>
+            </h1>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-white/85 sm:text-base">
+              Find a doctor, book an appointment, check bed availability, or track medication &amp; vaccinations —
+              all from one place.
+            </p>
+
+            <div className="mt-7">
+              <SearchBar />
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-white/80 sm:text-sm">
+              <span>{doctors.length}+ doctors listed</span>
+              <span className="opacity-50">&bull;</span>
+              <span>Book appointments online</span>
+              <span className="opacity-50">&bull;</span>
+              <span>24/7 scheduling</span>
+            </div>
           </div>
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-3 gap-3 sm:mt-14">
-          <StatPill value={freeBeds} label="beds free now" />
-          <StatPill value={totalBeds} label="total capacity" />
-          <StatPill value="24/7" label="scheduling access" />
-        </div>
+        {nextCampaign && (
+          <Link
+            to="/campaigns"
+            className="mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm"
+            style={{ background: 'var(--brand-soft-2)', color: 'var(--brand)' }}
+          >
+            <Megaphone size={16} className="shrink-0" />
+            <span className="flex-1 truncate">
+              <strong className="font-semibold">{nextCampaign.title}</strong>
+              <span className="ml-1" style={{ color: 'var(--text-secondary)' }}>
+                — {new Date(nextCampaign.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, free &amp; open to all
+              </span>
+            </span>
+            <ArrowRight size={14} className="shrink-0" />
+          </Link>
+        )}
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
-        <div className="mx-auto mb-8 max-w-2xl text-center">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto mb-7 max-w-2xl text-center">
           <h2 className="text-2xl font-semibold sm:text-3xl" style={{ color: 'var(--text-primary)' }}>
             Everything you need, digitised
           </h2>
           <p className="mt-2 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
-            Six core services built to cut administrative delay and improve accessibility.
+            Six core services, plus fast paths to emergency care and support.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map(({ to, icon: Icon, title, description }) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          {tiles.map(({ to, icon: Icon, title, tagline: staticTagline, color }) => {
+            const tagline = staticTagline ?? `${hospitals.length} with directions`
+            return (
             <Link
-              key={to}
+              key={title}
               to={to}
-              className="card group flex flex-col gap-3 p-5 transition-shadow hover:shadow-md"
+              className="card group flex flex-col items-center gap-2.5 p-4 text-center sm:p-5"
             >
               <span
-                className="flex h-10 w-10 items-center justify-center rounded-xl"
-                style={{ background: 'var(--brand-soft-2)', color: 'var(--brand)' }}
+                className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-105"
+                style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}
               >
-                <Icon size={20} strokeWidth={2} />
+                <Icon size={22} strokeWidth={2} />
               </span>
-              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {title}
-              </h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                {description}
-              </p>
-              <span
-                className="mt-1 inline-flex items-center gap-1 text-sm font-medium transition-transform group-hover:translate-x-0.5"
-                style={{ color: 'var(--brand)' }}
-              >
-                Open <ArrowRight size={14} />
+              </span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {tagline}
               </span>
             </Link>
-          ))}
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <StatPill value={`${freeBeds}`} label="beds free now" />
+          <StatPill value={`${totalBeds}`} label="total capacity" />
+          <StatPill value="24/7" label="scheduling access" />
         </div>
       </section>
     </>
@@ -142,8 +187,8 @@ export default function Home() {
 
 function StatPill({ value, label }) {
   return (
-    <div className="card px-3 py-4 text-center">
-      <div className="text-xl font-semibold tabular-nums sm:text-2xl" style={{ color: 'var(--text-primary)' }}>
+    <div className="card px-4 py-5 text-center">
+      <div className="text-2xl font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
         {value}
       </div>
       <div className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>

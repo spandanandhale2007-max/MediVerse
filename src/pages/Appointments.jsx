@@ -1,21 +1,38 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CalendarCheck, Clock, User, CheckCircle2, X } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import Badge from '../components/Badge'
-import { departments, doctors, appointmentSlots } from '../data/mock'
+import { useAuth } from '../context/AuthContext'
+import { departments, appointmentSlots } from '../data/mock'
+import { useDirectory } from '../context/AdminContext'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
 }
 
 export default function Appointments() {
+  const { profile } = useAuth()
+  const { doctors } = useDirectory() // a doctor hidden by an admin can't be booked
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({
-    name: '',
+    name: profile?.name ?? '',
     department: departments[0],
     doctorId: '',
     date: todayISO(),
     slot: appointmentSlots[0],
   })
+
+  // Arriving from a doctor's profile with "Book appointment" (?doctor=id) —
+  // preselect their department and themselves.
+  useEffect(() => {
+    const doctorId = searchParams.get('doctor')
+    if (!doctorId) return
+    const doctor = doctors.find((d) => d.id === doctorId)
+    if (doctor) {
+      setForm((f) => ({ ...f, department: doctor.specialty, doctorId: doctor.id }))
+    }
+  }, [searchParams, doctors])
   const [appointments, setAppointments] = useState([
     {
       id: 'seed-1',
@@ -160,8 +177,8 @@ export default function Appointments() {
 
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ background: 'var(--brand)' }}
+            className="flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
           >
             <CalendarCheck size={16} /> Confirm appointment
           </button>

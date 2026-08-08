@@ -1,0 +1,105 @@
+import { useId, useRef, useState } from 'react'
+import { Lock, Eye, EyeOff, ArrowBigUp } from 'lucide-react'
+
+// Reusable password field with a show/hide toggle. Use this for EVERY password
+// input rather than a bare <input type="password"> so the behaviour stays
+// consistent as more are added.
+//
+// Details that matter and are easy to get wrong:
+//  - type="button" on the toggle, or it submits the form
+//  - focus and caret position are restored after toggling, so revealing the
+//    password mid-typing doesn't send the cursor to the end
+//  - the toggle is not in the tab order by default (tabIndex -1): keyboard
+//    users tabbing from the field expect to reach the submit button next, and
+//    the control is still reachable by click and announced to screen readers
+//  - Caps Lock warning, because a capitalised password failing silently is
+//    one of the most common sign-in frustrations there is
+export default function PasswordInput({
+  value,
+  onChange,
+  placeholder = '••••••••',
+  autoComplete = 'current-password',
+  name = 'password',
+  autoFocus = false,
+  required = false,
+  id,
+}) {
+  const [visible, setVisible] = useState(false)
+  const [capsOn, setCapsOn] = useState(false)
+  const inputRef = useRef(null)
+  const generatedId = useId()
+  const inputId = id ?? generatedId
+
+  function toggle() {
+    const el = inputRef.current
+    const start = el?.selectionStart
+    const end = el?.selectionEnd
+    setVisible((v) => !v)
+    // Restore the caret after React swaps the input type.
+    requestAnimationFrame(() => {
+      if (!el) return
+      el.focus()
+      if (start !== null && start !== undefined) {
+        try {
+          el.setSelectionRange(start, end)
+        } catch {
+          // Some browsers refuse setSelectionRange on certain input types —
+          // focus alone is still the right outcome.
+        }
+      }
+    })
+  }
+
+  function trackCapsLock(e) {
+    if (typeof e.getModifierState === 'function') setCapsOn(e.getModifierState('CapsLock'))
+  }
+
+  return (
+    <>
+      <div
+        className="flex items-center overflow-hidden rounded-lg"
+        style={{ border: '1px solid var(--border)', background: 'var(--surface-1)' }}
+      >
+        <span className="flex items-center px-3" style={{ color: 'var(--text-muted)' }}>
+          <Lock size={15} />
+        </span>
+        <input
+          ref={inputRef}
+          id={inputId}
+          name={name}
+          type={visible ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          onKeyUp={trackCapsLock}
+          onKeyDown={trackCapsLock}
+          onBlur={() => setCapsOn(false)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          required={required}
+          className="w-full bg-transparent py-2.5 text-sm outline-none"
+          style={{ color: 'var(--text-primary)' }}
+        />
+        <button
+          type="button"
+          onClick={toggle}
+          tabIndex={-1}
+          aria-controls={inputId}
+          aria-pressed={visible}
+          aria-label={visible ? 'Hide password' : 'Show password'}
+          title={visible ? 'Hide password' : 'Show password'}
+          className="flex items-center px-3 py-2.5"
+          style={{ color: visible ? 'var(--brand)' : 'var(--text-muted)' }}
+        >
+          {visible ? <EyeOff size={15} /> : <Eye size={15} />}
+        </button>
+      </div>
+
+      {capsOn && (
+        <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: '#9a6a00' }}>
+          <ArrowBigUp size={13} strokeWidth={2.5} /> Caps Lock is on
+        </p>
+      )}
+    </>
+  )
+}
