@@ -1,20 +1,13 @@
-// Location options for the hospital directory's state/city filters.
+// State/city options for the hospital directory filters.
 //
-// IMPORTANT CONTRACT: this list mirrors src/data/hospitals.js — every state
-// and every city named here has at least one real hospital listed. It is
-// deliberately NOT a complete list of Indian states and cities.
+// CONTRACT: mirrors src/data/hospitals.js — every state and city here has at
+// least one real hospital. Deliberately NOT a full list of Indian states/cities,
+// so the picker never offers a place that returns "no hospitals listed".
 //
-// The reason is plain: a picker that offers Bihar or Manipur and then returns
-// "no hospitals listed yet" wastes the time of someone who may be looking for
-// care urgently. Better to show only what we can actually answer.
+// Keep in sync by hand (the build won't catch drift): add a state/city when you
+// add its first hospital; remove a city when its last hospital goes.
 //
-// So when you add hospitals for a new state or city, add it here too — and if
-// you ever remove the last hospital in a city, remove the city here as well.
-// `npm run build` will not catch a mismatch; the check is:
-//   every city in this file has hospitals, and every hospital's city is here.
-//
-// This file previously carried all 28 states + 8 UTs. That version is in git
-// history if national coverage is ever completed.
+// The old full 28-state + 8-UT list is in git history.
 
 export const indiaStates = [
   { name: 'Chandigarh', cities: ['Chandigarh'] },
@@ -36,7 +29,7 @@ export const indiaStates = [
     cities: ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar', 'Dewas', 'Satna'],
   },
   {
-    // Our deepest-covered state.
+    // Most cities covered.
     name: 'Maharashtra',
     cities: [
       'Mumbai',
@@ -60,6 +53,8 @@ export const indiaStates = [
       'Nanded',
       'Chandrapur',
       'Ahilyanagar',
+      'Dhule',
+      'Jalna',
     ],
   },
   {

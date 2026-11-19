@@ -24,7 +24,10 @@ function encode(data) {
 
 export default function Support() {
   const { auth, profile } = useAuth()
-  const submittedBy = auth?.phone ? { phone: auth.phone, name: profile?.name ?? null } : null
+  // Identity is the email; phone comes from the profile so support can ring back.
+  const submittedBy = auth?.email
+    ? { email: auth.email, phone: profile?.phone ?? null, name: profile?.name ?? null }
+    : null
   const [form, setForm] = useState({ name: '', email: '', category: categories[0], subject: '', message: '' })
   const [status, setStatus] = useState('idle') // idle | sending | sent | error
   const [copied, setCopied] = useState(false)
@@ -35,8 +38,7 @@ export default function Support() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // Clipboard API unavailable (rare, e.g. very old browsers) — the
-      // email is already visible as plain text right next to the button.
+      // Clipboard API unavailable (rare) — the email is shown as plain text next to the button.
     }
   }
 
@@ -50,10 +52,9 @@ export default function Support() {
     setStatus('sending')
 
     if (import.meta.env.DEV) {
-      // Netlify Forms only has a real endpoint on Netlify's own servers —
-      // there's nothing on the Vite dev server to receive this POST, so a
-      // real fetch here would always fail. Simulate the round trip instead
-      // of showing a false "couldn't send" error during local review.
+      // Netlify Forms only works on Netlify's servers — the Vite dev server has
+      // nothing to receive this POST, so simulate the round trip instead of
+      // showing a false "couldn't send" error during local review.
       await new Promise((r) => setTimeout(r, 500))
       recordReport('support', form, { delivered: false, submittedBy })
       setStatus('preview')

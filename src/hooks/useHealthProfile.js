@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
 const LEGACY_KEY = 'mediverse-health-profile' // single global record (pre-fix)
-const STORAGE_KEY = 'mediverse-health-profiles' // { [phone]: record }
+const STORAGE_KEY = 'mediverse-health-profiles' // { [identity]: record }
 
 function readMap() {
   if (typeof window === 'undefined') return {}
@@ -19,24 +19,23 @@ function write(map) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map))
 }
 
-// The medication tracker's health history. Kept separate from the basic
-// account profile (name/age/location) because this is sensitive clinical
-// data — see the privacy note shown on the intake form.
+// Medication tracker's health history — sensitive clinical data (see the
+// intake form's privacy note), kept separate from the basic account profile
+// (name/age/location).
 //
-// KEYED BY PHONE NUMBER, and that matters: this used to be one global record,
-// which meant that on a shared phone the next person to sign in saw the
-// previous person's chronic conditions, allergies and medication list. Never
-// store clinical data under a key that isn't scoped to the account.
-export function useHealthProfile(phone) {
+// KEYED BY PHONE so it's scoped to the account. It used to be one global
+// record, so on a shared identity the next sign-in saw the previous person's
+// conditions, allergies and meds. Never store clinical data unscoped.
+export function useHealthProfile(identity) {
   const [map, setMap] = useState(() => {
     const current = readMap()
-    // One-time migration of the old global record onto whoever is signed in
-    // now, so an existing user doesn't lose an intake they already completed.
-    if (typeof window !== 'undefined' && phone && !current[phone]) {
+    // One-time migration: move the old global record onto the current user
+    // so an existing intake isn't lost.
+    if (typeof window !== 'undefined' && identity && !current[identity]) {
       try {
         const legacyRaw = window.localStorage.getItem(LEGACY_KEY)
         if (legacyRaw) {
-          const migrated = { ...current, [phone]: JSON.parse(legacyRaw) }
+          const migrated = { ...current, [identity]: JSON.parse(legacyRaw) }
           write(migrated)
           window.localStorage.removeItem(LEGACY_KEY)
           return migrated
@@ -49,30 +48,30 @@ export function useHealthProfile(phone) {
     return current
   })
 
-  const healthProfile = useMemo(() => (phone ? (map[phone] ?? null) : null), [map, phone])
+  const healthProfile = useMemo(() => (identity ? (map[identity] ?? null) : null), [map, identity])
 
   const saveHealthProfile = useCallback(
     (data) => {
-      if (!phone) return
+      if (!identity) return
       const record = { ...data, updatedAt: new Date().toISOString() }
       setMap((prev) => {
-        const next = { ...prev, [phone]: record }
+        const next = { ...prev, [identity]: record }
         write(next)
         return next
       })
     },
-    [phone],
+    [identity],
   )
 
   const clearHealthProfile = useCallback(() => {
-    if (!phone) return
+    if (!identity) return
     setMap((prev) => {
       const next = { ...prev }
-      delete next[phone]
+      delete next[identity]
       write(next)
       return next
     })
-  }, [phone])
+  }, [identity])
 
   return { healthProfile, hasHealthProfile: !!healthProfile, saveHealthProfile, clearHealthProfile }
 }

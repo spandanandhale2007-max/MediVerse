@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Star, Clock, MapPin, Building2, Languages, IndianRupee, GraduationCap, CalendarCheck, Globe } from 'lucide-react'
 import Badge from './Badge'
@@ -11,16 +11,48 @@ const STATUS_MAP = {
 
 export default function DoctorProfileModal({ doctor, onClose }) {
   const navigate = useNavigate()
+  const panelRef = useRef(null)
+  const returnFocusRef = useRef(null)
 
   useEffect(() => {
+    // Remember what had focus so we can restore it when the dialog closes.
+    returnFocusRef.current = document.activeElement
+
     function handleKey(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      // Keep Tab focus inside the dialog while it's open.
+      if (e.key === 'Tab' && panelRef.current) {
+        const items = Array.from(
+          panelRef.current.querySelectorAll(
+            'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((el) => el.offsetParent !== null)
+        if (items.length === 0) return
+        const first = items[0]
+        const last = items[items.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
     }
+
     document.addEventListener('keydown', handleKey)
     document.body.style.overflow = 'hidden'
+    // Move focus into the dialog (its close button) on open.
+    const t = setTimeout(() => panelRef.current?.querySelector('button')?.focus(), 0)
+
     return () => {
       document.removeEventListener('keydown', handleKey)
       document.body.style.overflow = ''
+      clearTimeout(t)
+      returnFocusRef.current?.focus?.()
     }
   }, [onClose])
 
@@ -44,6 +76,10 @@ export default function DoctorProfileModal({ doctor, onClose }) {
       />
 
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="doctor-modal-title"
         className="card relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-b-none p-6 sm:rounded-2xl"
         style={{ boxShadow: '0 24px 60px -20px rgba(0,0,0,0.5)' }}
       >
@@ -66,7 +102,7 @@ export default function DoctorProfileModal({ doctor, onClose }) {
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h2 id="doctor-modal-title" className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {doctor.name}
               </h2>
               {doctor.featured && (

@@ -14,7 +14,9 @@ function encode(data) {
 
 export default function Emergency() {
   const { auth, profile } = useAuth()
-  const submittedBy = auth?.phone ? { phone: auth.phone, name: profile?.name ?? null } : null
+  const submittedBy = auth?.email
+    ? { email: auth.email, phone: profile?.phone ?? null, name: profile?.name ?? null }
+    : null
   const [area, setArea] = useState(profile?.location ?? '')
   const [details, setDetails] = useState('')
   const [status, setStatus] = useState('idle') // idle | sending | sent | preview | error
@@ -26,7 +28,8 @@ export default function Emergency() {
 
     const payload = {
       'form-name': 'emergency',
-      phone: auth?.phone ?? '',
+      email: auth?.email ?? '',
+      phone: profile?.phone ?? '',
       name: profile?.name ?? '',
       area,
       details,
@@ -170,7 +173,7 @@ export default function Emergency() {
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
               style={{ color: 'var(--text-muted)', background: 'var(--surface-1)' }}
             >
-              <Phone size={13} className="shrink-0" /> We'll call you back on {auth?.phone ?? 'your registered number'}.
+              <Phone size={13} className="shrink-0" /> We'll call you back on {profile?.phone ?? 'the number in your profile'}.
             </div>
 
             {status === 'error' && (

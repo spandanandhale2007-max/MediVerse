@@ -1,54 +1,34 @@
-// Real, independently-operated hospitals — public directory info only
-// (name, address, phone, official site).
+// Real, independently-run hospitals — public directory info only (name,
+// address, phone, official site).
 //
-// NONE of these hospitals are part of the "MediVerse network." No
-// affiliation, booking pipeline, doctor roster, or bed availability is
-// claimed or fabricated for them — this is a reference directory, not a
-// MediVerse service. See src/pages/RealHospitals.jsx for the user-facing
-// disclaimer.
+// NOT part of any "MediVerse network": no affiliation, booking, doctor roster
+// or bed availability is claimed for them. Reference directory, not a service.
+// See src/pages/RealHospitals.jsx for the user-facing disclaimer.
 //
-// COVERAGE IS NOT EXHAUSTIVE. Pune alone has several hundred hospitals and
-// nursing homes; without a Places API only well-documented ones can be
-// verified. Entries are added only when a real source backs them — never
-// invented to pad the list, because a wrong address in an emergency is
-// worse than a missing one.
+// Coverage is NOT exhaustive. Entries are added only when a real source backs
+// them — never invented, since a wrong address in an emergency is worse than a
+// missing one.
 //
-// `verified` records how far each entry was checked:
-//   'direct'   — fetched that hospital's own official contact page
-//                (Pune + rest of India 2026-08-07, Maharashtra 2026-08-08)
-//   'govt'     — listed on the district administration's own *.gov.in
-//                public-utility directory; official, but second-hand
-//   'search'   — web search results quoting its official domain, not re-fetched
-//   'listings' — only third-party directory listings agreed; weakest
-// Nothing here has been confirmed by an actual phone call — no tool
-// available can place one.
+// `verified` = how far each entry was checked:
+//   'direct'   — fetched the hospital's own official contact page
+//   'govt'     — on the district *.gov.in directory; official but second-hand
+//   'search'   — web search quoting its official domain, not re-fetched
+//   'listings' — third-party listings only; weakest
+// Nothing was confirmed by phone (no tool can place a call).
 //
-// `website` is optional. It is left off where a hospital has no working
-// official domain (e.g. an expired one now serving unrelated spam) — linking
-// users there would be worse than showing no link at all.
+// `website` optional — left off when a hospital has no working domain (e.g. an
+// expired one now serving spam); no link beats a bad link.
 //
-// `doctorsUrl` is optional: a DEEP LINK to that hospital's own "find a doctor"
-// page, verified by fetching the hospital's site and reading the link out of
-// its navigation.
+// `doctorsUrl` optional — deep link to the hospital's own "find a doctor" page.
 //
-// `email` is optional and is ALWAYS an institutional address — info@,
-// enquiry@, opd@, the Medical Superintendent's or Dean's office — published
-// by the hospital or its district .gov.in page precisely so the public can
-// write to it. No individual doctor's personal address is stored here and
-// none should ever be added: a named person's contact details are theirs to
-// publish, not ours to re-host, and patients should reach a consultant
-// through the hospital's own appointment desk anyway.
+// `email` optional and ALWAYS institutional (info@, opd@, MS/Dean's office),
+// published so the public can write in. Never an individual doctor's personal
+// address — those are theirs to publish, not ours to re-host.
 //
-// We deliberately do NOT copy doctor names, degrees or specialities into this
-// app. Two reasons:
-//   1. Rosters go stale fast — consultants move, retire, change timings. A
-//      stale copy here would send a patient to a hospital to see someone who
-//      left, and the hospital cannot correct our copy.
-//   2. These are real, identifiable private individuals. Re-hosting their
-//      professional profiles on an unaffiliated app gives them no way to
-//      correct or remove anything about themselves.
-// Linking out solves the user's actual problem (who can I see at this
-// hospital?) with data that is always current and always attributed.
+// We deliberately do NOT copy doctor names/degrees/specialities: rosters go
+// stale (would send a patient to see someone who left, and the hospital can't
+// fix our copy), and these are real private individuals who can't correct a
+// re-hosted profile. Linking out stays current and attributed.
 
 export const realHospitals = [
   // ---------------------------------------------------------------- Pune
@@ -373,6 +353,20 @@ export const realHospitals = [
     website: 'https://sahyadrihospital.com/nagar-road',
     verified: 'listings',
     note: 'Number shown is the Sahyadri group helpline — ask for the Nagar Road unit. No unit-specific line could be confirmed.',
+  },
+  {
+    id: 'p28',
+    name: 'VishwaRaj Hospital',
+    state: 'Maharashtra',
+    city: 'Pune',
+    area: 'Loni Kalbhor',
+    address: 'Near Loni Railway Station, Solapur–Pune Highway, Loni Kalbhor, Pune, Maharashtra 412201',
+    phone: '+91-20-6760-6060',
+    emergencyPhone: '+91-88866-06060',
+    email: 'info@vrhpune.com',
+    website: 'https://vishwarajhospital.com/',
+    verified: 'direct',
+    note: 'Multispecialty hospital (~300 beds) on the Solapur–Pune highway at Loni Kalbhor, close to MIT ADT University.',
   },
 
   // -------------------------------------------------------------- Mumbai
@@ -1501,6 +1495,137 @@ export const realHospitals = [
     website: 'https://ahmednagar.nic.in/en/public-utility/district-hospital/',
     verified: 'search',
     note: 'The city was renamed from Ahmednagar to Ahilyanagar — older listings and signage still use the old name.',
+  },
+
+  // --------------------------------------------------------------- Dhule
+  {
+    id: 'dhl1',
+    name: 'Shri Bhausaheb Hire Government Medical College & Hospital',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Malegaon Road',
+    address: 'Chakkarbardi, Malegaon Road, Samta Nagar, Dhule, Maharashtra 424001',
+    phone: '02562-239407',
+    email: 'deangmcdhule@gmail.com',
+    website: 'https://sbhgmcdhule.org/',
+    verified: 'search',
+    note: 'Government teaching hospital (established 1989) — the largest in Dhule district.',
+  },
+  {
+    id: 'dhl2',
+    name: 'District Civil Hospital, Dhule',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Sakri Road',
+    address: 'Sakri Road, in front of the Public Works building, near Santoshi Mata Temple, Dhule, Maharashtra 424001',
+    phone: '02562-282875',
+    website: 'https://dhule.gov.in/en/civil-hospital-dhule/',
+    verified: 'govt',
+  },
+  {
+    id: 'dhl3',
+    name: 'Jawahar Medical Foundation — ACPM Medical College & Hospital',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Sakri Road',
+    address: 'Hutatma Shirishkumar Nagar, Sakri Road, Dhule, Maharashtra 424001',
+    phone: '02562-276317',
+    verified: 'listings',
+    note: 'Teaching hospital of ACPM Medical College, run by the Jawahar Medical Foundation.',
+  },
+  {
+    id: 'dhl4',
+    name: 'Bhatwal Surgical Hospital',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Malegaon Road',
+    address: '111/A, Malegaon Road, Agrawal Nagar, Dhule, Maharashtra 424001',
+    phone: '02562-232803',
+    verified: 'listings',
+    note: 'Surgical & maternity hospital, established 1986. Details from a local directory — confirm before travelling.',
+  },
+  {
+    id: 'dhl5',
+    name: 'Om Hospital & Critical Care Centre',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Agrawal Nagar',
+    address: 'Dhule–Malegaon Road, Agrawal Nagar, Dhule, Maharashtra 424001',
+    phone: '02562-241313',
+    verified: 'listings',
+    note: 'Details from a local directory — confirm before travelling.',
+  },
+  {
+    id: 'dhl6',
+    name: 'Khandesh Cancer Centre',
+    state: 'Maharashtra',
+    city: 'Dhule',
+    area: 'Samata Nagar',
+    address: 'Dhule–Surat Bypass Road, Samata Nagar, Dhule, Maharashtra',
+    phone: '02562-280000',
+    verified: 'listings',
+    note: 'Dedicated cancer centre. PIN code unconfirmed — search by name in Maps.',
+  },
+
+  // --------------------------------------------------------------- Jalna
+  {
+    id: 'jln1',
+    name: 'Government Medical College, Jalna',
+    state: 'Maharashtra',
+    city: 'Jalna',
+    area: 'Ambad–Mantha Road',
+    address: 'Opposite Sushila Devi Lawns, Ambad–Mantha Road, Jalna, Maharashtra 431213',
+    phone: '02482-299105',
+    email: 'deangmcjalna@gmail.com',
+    website: 'https://www.gmcjalna.org/',
+    verified: 'search',
+    note: 'New government medical college (established 2024) serving the Marathwada region.',
+  },
+  {
+    id: 'jln2',
+    name: 'Jalna Multispeciality Hospital',
+    state: 'Maharashtra',
+    city: 'Jalna',
+    area: 'Satkar Nagar',
+    address: 'Satkar Nagar, Ambad Chowfuly, Jalna, Maharashtra 431203',
+    phone: '02482-223551',
+    email: 'info@jalnahospital.com',
+    website: 'https://jalnahospital.com/',
+    verified: 'govt',
+  },
+  {
+    id: 'jln3',
+    name: 'Sanjeevani Multispeciality Hospital',
+    state: 'Maharashtra',
+    city: 'Jalna',
+    area: 'Ambad Chowfuly',
+    address: 'Rishi Park, Ambad Chowfuly, Jalna, Maharashtra 431203',
+    phone: '02482-223322',
+    email: 'contactsmhjalna@gmail.com',
+    verified: 'govt',
+  },
+  {
+    id: 'jln4',
+    name: 'Aadhar Multispeciality Hospital',
+    state: 'Maharashtra',
+    city: 'Jalna',
+    area: 'Nehru Nagar',
+    address: 'Nehru Nagar, near ST Bus Stand, Aurangabad Road, Jalna, Maharashtra 431203',
+    phone: '02482-240007',
+    email: 'aadharmultispeciality@gmail.com',
+    verified: 'govt',
+  },
+  {
+    id: 'jln5',
+    name: 'OM Multispeciality Hospital & Research Centre',
+    state: 'Maharashtra',
+    city: 'Jalna',
+    area: 'Shivaji Chowk',
+    address: 'Shivaji Statue Road, Shivaji Chowk, Jalna, Maharashtra 431203',
+    phone: '02482-230905',
+    email: 'omhospitaljalna@gmail.com',
+    website: 'https://omhospital.in/',
+    verified: 'govt',
   },
 
   // ------------------------------------------------------- Rest of India
@@ -2936,8 +3061,24 @@ export function mapsDirectionsUrl(h) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapsQuery(h))}`
 }
 
+// Inline map iframe.
+//
+// The obvious form — maps.google.com/maps?q=...&output=embed — LOOKS right and
+// returns 200 in a browser tab, but it is a 301 to /maps/embed, and that
+// redirect response carries `X-Frame-Options: SAMEORIGIN`. Browsers apply
+// XFO to every hop of a redirect chain, so the frame is refused before it ever
+// reaches the page that would have allowed it. The inline map just came up
+// blank.
+//
+// Hitting the redirect's own target directly returns 200 with no XFO and no
+// frame-ancestors, so it frames correctly — and still needs no API key.
+// Verified against several hospitals on 2026-08-09.
+//
+// `pb` is Google's own packed-parameter format: !1m2!2m1!1s introduces a
+// single search string. Spaces must be `+`, not %20.
 export function mapsEmbedUrl(h) {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(mapsQuery(h))}&output=embed`
+  const q = encodeURIComponent(mapsQuery(h)).replace(/%20/g, '+')
+  return `https://www.google.com/maps/embed?origin=mfe&pb=!1m2!2m1!1s${q}`
 }
 
 export const VERIFICATION_LABELS = {

@@ -45,12 +45,12 @@ export default function CarePlan({ healthProfile }) {
         </h2>
       </div>
 
-      {/* The important disclaimer — first thing, not buried at the bottom */}
+      {/* Disclaimer — kept up top, not buried at the bottom */}
       <div
         className="mb-5 flex items-start gap-3 rounded-2xl px-4 py-3.5 text-sm"
         style={{ background: 'color-mix(in srgb, var(--status-warning) 14%, transparent)', color: 'var(--text-secondary)' }}
       >
-        <AlertTriangle size={17} className="mt-0.5 shrink-0" style={{ color: '#9a6a00' }} />
+        <AlertTriangle size={17} className="mt-0.5 shrink-0" style={{ color: 'var(--warn-fg)' }} />
         <p>
           <strong style={{ color: 'var(--text-primary)' }}>This does not prescribe medication.</strong> It won't tell
           you which drug to start or what dose to take — that depends on your kidney and liver function, lab results,
@@ -59,7 +59,7 @@ export default function CarePlan({ healthProfile }) {
         </p>
       </div>
 
-      {/* Emergency red flags — high priority, so it sits near the top */}
+      {/* Emergency red flags — kept near the top */}
       {redFlags.length > 0 && (
         <div
           className="mb-5 rounded-2xl p-4"

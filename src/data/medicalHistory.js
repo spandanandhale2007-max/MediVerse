@@ -1,22 +1,8 @@
 // Option lists for the medication tracker's health-profile intake.
-//
-// Field structure follows standard clinical medical-history intake forms
-// (demographics → past medical history → surgical history → allergies →
-// current medications → family history → social/lifestyle history), per
-// StatPearls "Medical History" (NCBI Bookshelf NBK534249) and common
-// clinical intake templates.
-//
-// Condition list is weighted toward India's actual chronic disease burden:
-// hypertension (~26%), diabetes (~12%), arthritis (~9%), lung disease
-// (~6.4%), heart disease/stroke (~5.3%), neurological (~2.2%), cancer
-// (~0.6%) — per LASI/NFHS-based prevalence studies.
-//
-// Drug allergy list leads with the three highest-prevalence culprits
-// (penicillins ~10% reported, sulfonamides ~3-8%, NSAIDs).
-//
-// Medication classes follow standard pharmacological classification
-// (antihypertensives, antidiabetics incl. all 10 oral classes + insulin,
-// lipid-lowering, etc.).
+// Field structure follows standard clinical intake forms.
+// Conditions are ordered by prevalence in India (hypertension, diabetes, etc.).
+// Drug allergies lead with the most common culprits (penicillins, sulfa, NSAIDs).
+// Medication classes follow standard pharmacological grouping.
 
 export const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "Don't know"]
 

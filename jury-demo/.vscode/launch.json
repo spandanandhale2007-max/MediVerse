@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "1. Run the walkthrough",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/run.js",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "2. Ask the assistant",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/ask.js",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

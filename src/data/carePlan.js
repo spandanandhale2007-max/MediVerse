@@ -1,25 +1,16 @@
 // Condition-specific care guidance for the medication tracker.
 //
-// DELIBERATE SCOPE LIMIT — read before extending this file:
-// This does NOT recommend which medication a user should start, or what dose
-// to take. Dose depends on renal/hepatic function, labs, severity, and
-// interactions that a self-reported intake form cannot capture (e.g. metformin
-// is contraindicated in significant renal impairment), and self-reported
-// conditions are frequently incomplete or wrong. Suggesting a drug or dose
-// here could cause real harm to a real user.
+// SCOPE LIMIT: never suggests which drug or what dose. Dose depends on
+// renal/hepatic function, labs, severity and interactions a self-report form
+// can't capture, and self-reported conditions are often wrong — a wrong
+// suggestion could really harm someone.
 //
-// What it DOES provide, all of which is published, non-individualised
-// guidance safe to surface:
-//   - which specialist treats the condition (routing)
-//   - guideline-based monitoring/check-up intervals
-//   - vaccines recommended for people with that condition
-//   - lifestyle measures
-//   - red-flag symptoms meaning "seek care now"
+// It only provides published, non-individualised guidance: which specialist
+// to see, monitoring intervals, recommended vaccines, lifestyle measures, and
+// red-flag symptoms meaning "seek care now".
 //
-// Sources: ADA Standards of Care in Diabetes (2024/2025), general
-// hypertension follow-up guidance (monthly until controlled, then 3–6
-// monthly; renal function/electrolytes 1–2×/year), GOLD COPD vaccination
-// recommendations, and standard specialist-referral guidance.
+// Sources: ADA Diabetes Standards (2024/2025), general hypertension follow-up
+// guidance, GOLD COPD vaccination recommendations, standard specialist-referral guidance.
 
 export const conditionCarePlans = {
   'Hypertension (high BP)': {
@@ -331,9 +322,8 @@ export const conditionCarePlans = {
   },
 }
 
-// General administration guidance for medications the user says they ALREADY
-// take. This is standard label/pharmacology guidance on HOW to take them —
-// never what dose to take. The user's dose comes from their prescription.
+// How to take meds the user ALREADY takes — standard label guidance on HOW,
+// never what dose. Their dose comes from their prescription.
 export const medicationGuidance = {
   Metformin: {
     timing: 'With or just after food',
@@ -459,8 +449,7 @@ export const medicationGuidance = {
   Fibrates: { timing: 'Usually with a meal', why: 'Reduces stomach upset.', cautions: ['Report muscle pain, especially if also on a statin'] },
 }
 
-// Standard dosing-interval guidance — how to space doses your doctor has
-// already prescribed. Not a recommendation of how many doses to take.
+// How to space doses already prescribed — not how many doses to take.
 export const dosingIntervals = [
   { label: 'Once daily (OD)', gap: 'Same time every day', note: 'Pick a time you will remember and stick to it.' },
   { label: 'Twice daily (BD)', gap: 'About 12 hours apart', note: 'For example 8 AM and 8 PM.' },

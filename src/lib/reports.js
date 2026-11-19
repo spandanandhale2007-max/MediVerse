@@ -1,12 +1,10 @@
-// Local record of what users submitted through the support and ambulance
-// forms, so the admin console has something real to show.
+// Local copy of support/ambulance form submissions for the admin console.
 //
-// IMPORTANT — where submissions actually go: the live forms POST to Netlify
-// Forms, which emails mediversehelp@gmail.com. That is the system of record.
-// This file only keeps a copy in the submitting browser's localStorage, which
-// means an admin sees the reports raised on their OWN device, not everyone's.
-// Reading the real cross-user inbox needs a server call with a Netlify API
-// token, and a token cannot live in client-side code.
+// Real submissions go to Netlify Forms (emails mediversehelp@gmail.com) — that's
+// the source of truth. This only keeps a copy in the submitting browser's
+// localStorage, so an admin sees reports raised on their OWN device, not everyone's.
+// The real cross-user inbox needs a server call with a Netlify API token, which
+// can't live in client-side code.
 const KEY = 'mediverse-reports'
 const LIMIT = 100
 

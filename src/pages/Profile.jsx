@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, MapPin, Phone, UserRound, Check, Trash2 } from 'lucide-react'
+import { LogOut, MapPin, Phone, Mail, UserRound, Check, Trash2 } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,6 +11,8 @@ export default function Profile() {
     name: profile?.name ?? '',
     age: profile?.age ?? '',
     location: profile?.location ?? '',
+    // Phone is a profile field now that login is by email — ambulance dispatch still needs a callback number.
+    phone: (profile?.phone ?? '').replace('+91', ''),
   })
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
@@ -36,8 +38,17 @@ export default function Profile() {
       setError('Enter where you stay.')
       return
     }
+    if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      setError('Enter a valid 10-digit mobile number.')
+      return
+    }
     setError('')
-    saveProfile({ name: form.name.trim(), age, location: form.location.trim() })
+    saveProfile({
+      name: form.name.trim(),
+      age,
+      location: form.location.trim(),
+      phone: `+91${form.phone}`,
+    })
     setSaved(true)
     setTimeout(() => navigate('/'), 600)
   }
@@ -109,15 +120,47 @@ export default function Profile() {
             </div>
           </div>
 
+          {/* Editable: ambulance and hospital callbacks use this. */}
           <div>
             <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               Mobile number
             </label>
             <div
-              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm"
+              className="flex items-center overflow-hidden rounded-lg"
+              style={{ border: '1px solid var(--border)', background: 'var(--surface-1)' }}
+            >
+              <span
+                className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium"
+                style={{ color: 'var(--text-secondary)', borderRight: '1px solid var(--border)' }}
+              >
+                <Phone size={14} /> +91
+              </span>
+              <input
+                name="phone"
+                inputMode="numeric"
+                autoComplete="tel"
+                value={form.phone}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))
+                  setSaved(false)
+                }}
+                placeholder="98765 43210"
+                className="w-full bg-transparent px-3 py-2.5 text-sm outline-none"
+                style={{ color: 'var(--text-primary)' }}
+              />
+            </div>
+          </div>
+
+          {/* Read-only: the account identity — change it by signing in with a different address. */}
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              Email (your login)
+            </label>
+            <div
+              className="flex items-center gap-2 break-all rounded-lg px-3 py-2.5 text-sm"
               style={{ border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-muted)' }}
             >
-              <Phone size={15} /> {auth?.phone}
+              <Mail size={15} className="shrink-0" /> {auth?.email}
             </div>
           </div>
 
@@ -151,7 +194,7 @@ export default function Profile() {
           </button>
 
           <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
-            Logging out keeps these details, so signing in with {auth?.phone ?? 'this number'} again skips the setup
+            Logging out keeps these details, so signing in with {auth?.email ?? 'this address'} again skips the setup
             form.
           </p>
 

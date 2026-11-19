@@ -10,10 +10,8 @@ import AdminSupport from '../components/admin/AdminSupport'
 import AdminActivity from '../components/admin/AdminActivity'
 import AdminSettings from '../components/admin/AdminSettings'
 
-// Layout follows the convention every admin terminal uses: a sticky left rail
-// for primary navigation, one working area, and nothing else competing for
-// attention. Sections are local state rather than routes so a half-finished
-// edit isn't lost to a back button.
+// Sticky left nav rail + one working area. Sections are local state, not
+// routes, so a half-finished edit survives the back button.
 const SECTIONS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'hospitals', label: 'Hospitals', icon: Building2 },
@@ -30,8 +28,7 @@ export default function AdminDashboard() {
   const [navOpen, setNavOpen] = useState(false)
   const [unread, setUnread] = useState(unreadReportCount)
 
-  // A ticket raised by a patient has to show up here without a page reload —
-  // that's the whole point of a control log.
+  // Patient tickets must appear here without a page reload.
   const refreshUnread = useCallback(() => setUnread(unreadReportCount()), [])
   useEffect(() => {
     window.addEventListener('mediverse:report', refreshUnread)
@@ -53,7 +50,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
-      {/* -------------------------------------------------- sidebar rail */}
+      {/* sidebar rail */}
       <aside className="hidden w-56 shrink-0 lg:block">
         <SideNav section={section} onSelect={setSection} counts={counts} pendingCount={pendingCount} />
       </aside>
@@ -144,7 +141,7 @@ function SideNav({ section, onSelect, counts, pendingCount }) {
 
       <div
         className="mt-2 flex items-start gap-2 rounded-lg px-3 py-2.5 text-[11px] leading-snug"
-        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: '#9a6a00' }}
+        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: 'var(--warn-fg)' }}
       >
         <ShieldAlert size={13} className="mt-0.5 shrink-0" strokeWidth={2.5} />
         <span>Changes save to this browser only — there's no backend yet.</span>

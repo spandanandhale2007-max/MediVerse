@@ -2,19 +2,15 @@ import { useCallback, useState } from 'react'
 
 const KEY = 'mediverse-admin-overrides'
 
-// Admin edits live as an OVERLAY on top of the shipped data files rather than
-// mutating them: src/data/*.js stays the source of truth, and this records the
-// admin's diffs against it. Two reasons — the data files are static imports we
-// can't write to from the browser, and an overlay makes every change
-// reversible, which is what you want for a delete button.
+// Admin edits are an OVERLAY on the shipped data (src/data/*.js stays the
+// source of truth). Why: static imports can't be written from the browser,
+// and an overlay keeps every change reversible.
 //
-// Deletes are SOFT: an id goes into hidden[], the record stops appearing
-// everywhere public, and it can be restored from the Hidden view. Nothing is
-// destroyed.
+// Deletes are SOFT: id goes into hidden[], the record hides from public views
+// and can be restored from the Hidden view. Nothing is destroyed.
 //
-// Scope: this is localStorage in one browser. It is not shared with other
-// users or devices and it is not a CMS. When a backend exists, swap the
-// read/write below for API calls and every consumer keeps working.
+// Scope: localStorage in one browser — not shared across users/devices, not a
+// CMS. Swap the read/write below for API calls when a backend exists.
 const EMPTY = {
   hiddenHospitals: [],
   hospitalEdits: {}, // { [id]: { name?, phone?, email?, ... } }
@@ -42,8 +38,8 @@ export function useAdminStore() {
     return next
   }, [])
 
-  // Every mutation writes an audit line: who, what, when. Without it an admin
-  // console is just a way to silently change data.
+  // Every mutation logs an audit line (who/what/when) — otherwise the console
+  // silently changes data.
   const withLog = useCallback((next, entry) => {
     const line = { ...entry, at: new Date().toISOString(), id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }
     return { ...next, log: [line, ...(next.log ?? [])].slice(0, 200) }

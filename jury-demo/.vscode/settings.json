@@ -1,0 +1,19 @@
+{
+  // Opening a terminal in this folder (Ctrl+`) runs the walkthrough straight
+  // away and then leaves a live prompt, so a demo needs no typing at all.
+  "terminal.integrated.profiles.windows": {
+    "MediVerse demo": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "args": ["/k", "node run.js"],
+      "icon": "beaker"
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "MediVerse demo",
+
+  // Readable from the back of a room.
+  "terminal.integrated.fontSize": 15,
+  "editor.fontSize": 15,
+  "editor.minimap.enabled": false,
+  "breadcrumbs.enabled": false,
+  "workbench.startupEditor": "readme"
+}

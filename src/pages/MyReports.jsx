@@ -8,9 +8,8 @@ import { readReports } from '../lib/reports'
 
 const SUPPORT_EMAIL = 'mediversehelp@gmail.com'
 
-// A patient's own submissions. Filtered to their phone number so one person's
-// tickets never show up under another account on a shared device — the same
-// rule the health profile and medication list follow.
+// A patient's own submissions, filtered to their email so one person's tickets
+// never show under another account on a shared device (same rule as health/meds).
 export default function MyReports() {
   const { auth } = useAuth()
   const [all, setAll] = useState(readReports)
@@ -28,8 +27,8 @@ export default function MyReports() {
   }, [refresh])
 
   const mine = useMemo(
-    () => all.filter((r) => r.submittedBy?.phone && r.submittedBy.phone === auth?.phone),
-    [all, auth?.phone],
+    () => all.filter((r) => r.submittedBy?.email && r.submittedBy.email === auth?.email),
+    [all, auth?.email],
   )
 
   return (
@@ -70,7 +69,7 @@ export default function MyReports() {
         ) : (
           <>
             <p className="mb-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-              {mine.length} report{mine.length === 1 ? '' : 's'} from {auth?.phone}
+              {mine.length} report{mine.length === 1 ? '' : 's'} from {auth?.email}
             </p>
 
             <div className="space-y-2.5">

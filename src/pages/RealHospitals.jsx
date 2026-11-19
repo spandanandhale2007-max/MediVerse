@@ -27,10 +27,8 @@ export default function RealHospitals() {
     if (c !== null) setCity(c)
   }, [searchParams])
 
-  // Covers all of India, not just states/cities we happen to have hospital
-  // data for — the city list is gated behind picking a state first, both
-  // because "which city" only makes sense once you know the state, and
-  // because showing every Indian city in one flat list isn't usable.
+  // City list covers all of India (from india.js), gated behind picking a
+  // state first — a flat list of every Indian city wouldn't be usable.
   const states = indiaStateNames
   const cities = useMemo(() => (state === ALL ? [] : citiesForState(state)), [state])
   const hospitalCount = useMemo(() => {
@@ -125,7 +123,7 @@ export default function RealHospitals() {
 
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Showing <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong> of {realHospitals.length}
+            Showing <strong style={{ color: 'var(--text-primary)' }}>{filtered.length}</strong> of {realHospitals.length}{' '}
             listed nationwide
             {profile?.location ? ` · your profile says ${profile.location}` : ''}
           </p>
@@ -241,8 +239,7 @@ export default function RealHospitals() {
                       >
                         {mapOpen ? <X size={11} /> : <MapIcon size={11} />} {mapOpen ? 'Hide map' : 'View on map'}
                       </button>
-                      {/* Deep link into the hospital's own doctor directory —
-                          we never copy their roster here, see hospitals.js */}
+                      {/* Deep link to the hospital's own doctor list — we never copy rosters (see hospitals.js). */}
                       {h.doctorsUrl && (
                         <a
                           href={h.doctorsUrl}
@@ -278,6 +275,18 @@ export default function RealHospitals() {
                         referrerPolicy="no-referrer-when-downgrade"
                         className="block h-64 w-full border-0 sm:h-72"
                       />
+                      {/* Safety net: the embed uses Google's internal `pb` format
+                          (see mapsEmbedUrl). If that breaks the frame goes blank,
+                          so this link always works via the documented URL scheme. */}
+                      <a
+                        href={mapsDirectionsUrl(h)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-medium"
+                        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border)' }}
+                      >
+                        Map not loading? Open in Google Maps <ExternalLink size={11} />
+                      </a>
                     </div>
                   )}
                 </div>

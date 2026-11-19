@@ -32,8 +32,7 @@ export default function SearchBar({ autoFocus = false }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Cycle the "Search for <term>..." hint while the field is empty — pauses
-  // the moment the user types anything.
+  // Rotate the placeholder hint while empty; stops once the user types.
   useEffect(() => {
     if (query) return
     const t = setInterval(() => {
@@ -88,6 +87,8 @@ export default function SearchBar({ autoFocus = false }) {
             aria-label="Search MediVerse"
             role="combobox"
             aria-expanded={open}
+            aria-controls="mv-search-listbox"
+            aria-activedescendant={open && activeIndex >= 0 ? `mv-search-opt-${activeIndex}` : undefined}
             aria-autocomplete="list"
           />
           {!query && (
@@ -112,7 +113,7 @@ export default function SearchBar({ autoFocus = false }) {
               No matches for "{query}" — try a doctor's name, department, or service.
             </p>
           ) : (
-            <ul className="max-h-80 overflow-y-auto py-2">
+            <ul id="mv-search-listbox" role="listbox" className="max-h-80 overflow-y-auto py-2">
               {results.map((item, i) => {
                 const Icon = item.icon
                 const active = i === activeIndex
@@ -120,6 +121,9 @@ export default function SearchBar({ autoFocus = false }) {
                   <li key={`${item.type}-${item.label}`}>
                     <button
                       type="button"
+                      id={`mv-search-opt-${i}`}
+                      role="option"
+                      aria-selected={active}
                       onMouseEnter={() => setActiveIndex(i)}
                       onClick={() => go(item)}
                       className="flex w-full items-center gap-3 px-4 py-2.5 text-left"

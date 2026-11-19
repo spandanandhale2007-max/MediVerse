@@ -1,6 +1,5 @@
-// MediVerse — mock/local data layer.
-// Structured so it's a drop-in seam for a real API later: swap the arrays
-// below for fetch() calls and every page keeps working unchanged.
+// MediVerse mock data layer. Swap these arrays for real API/fetch() calls
+// later and every page keeps working unchanged.
 
 export const departments = [
   'Cardiology',
@@ -22,12 +21,9 @@ export const departments = [
 
 export const states = ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Kerala', 'West Bengal', 'Gujarat']
 
-// `featured` marks doctors MediVerse highlights as renowned specialists in
-// their field/state — a curated subset of our own directory, not a claim
-// about real-world fame. `availableNationwide` marks doctors (mostly General
-// Medicine / telehealth) bookable regardless of which state the user picks.
-// Everyone here is a fictional MediVerse-network doctor — see memory note on
-// why real, named practitioners and their contact details aren't scraped in.
+// `featured`: doctors MediVerse highlights — a curated pick, not a real-fame claim.
+// `availableNationwide`: bookable from any state (mostly telehealth/General Medicine).
+// All doctors here are fictional; real named practitioners aren't used (see memory note).
 export const doctors = [
   { id: 'd1', name: 'Dr. Anjali Rao', specialty: 'Cardiology', state: 'Maharashtra', experience: 12, status: 'available', rating: 4.8, nextSlot: 'Today, 4:30 PM', featured: true, qualifications: 'MBBS, MD, DM (Cardiology)', hospital: 'MediVerse Heart Institute, Pune', languages: ['English', 'Hindi', 'Marathi'], fee: 900, bio: 'Specialises in interventional cardiology and preventive heart care, with a focus on early diagnosis of coronary disease.' },
   { id: 'd2', name: 'Dr. Vikram Sen', specialty: 'Orthopedics', state: 'Delhi', experience: 9, status: 'in-surgery', rating: 4.6, nextSlot: 'Tomorrow, 10:00 AM', featured: false, qualifications: 'MBBS, MS (Orthopedics)', hospital: 'MediVerse Multispecialty Hospital, Delhi', languages: ['English', 'Hindi'], fee: 700, bio: 'Focuses on sports injuries and joint replacement, working with patients through post-surgery rehab.' },
@@ -69,7 +65,27 @@ export const doctors = [
   { id: 'd38', name: 'Dr. Swati Kulkarni', specialty: 'Gynaecology', state: 'Maharashtra', experience: 10, status: 'available', rating: 4.7, nextSlot: 'Today, 4:15 PM', featured: false, qualifications: 'MBBS, MS (Obstetrics & Gynaecology)', hospital: 'MediVerse Heart Institute, Pune', languages: ['English', 'Hindi', 'Marathi'], fee: 750, bio: 'Women’s health, fertility counselling, and routine gynaecological screening.' },
   { id: 'd39', name: 'Dr. Harish Menon', specialty: 'Oncology', state: 'Kerala', experience: 20, status: 'in-surgery', rating: 4.9, nextSlot: 'Thu, 10:00 AM', featured: true, qualifications: 'MBBS, MD, DM (Medical Oncology)', hospital: 'MediVerse Neuro Centre, Kochi', languages: ['English', 'Malayalam', 'Hindi'], fee: 1200, bio: 'Senior medical oncologist focused on treatment planning and survivorship care.' },
   { id: 'd40', name: 'Dr. Pooja Agarwal', specialty: 'Oncology', state: 'Karnataka', experience: 13, status: 'available', rating: 4.8, nextSlot: 'Tomorrow, 3:00 PM', featured: false, qualifications: 'MBBS, MD, DM (Medical Oncology)', hospital: 'MediVerse Health City, Bengaluru', languages: ['English', 'Hindi', 'Kannada'], fee: 1100, bio: 'Medical oncology with a focus on early detection and follow-up screening.' },
+
+  // ---- Demo doctors for the VishwaRaj Hospital console ----
+  // Fictional demo practitioners, NOT real VishwaRaj doctors (same rule as above).
+  // `hospitalId: 'vishwaraj'` lets the console and appointment flow filter to this
+  // hospital for testing. The real VishwaRaj is in hospitals.js (id p28) as a
+  // reference listing only, not bookable.
+  { id: 'vrh1', hospitalId: 'vishwaraj', name: 'Dr. Aditi Kulkarni', specialty: 'Cardiology', state: 'Maharashtra', experience: 14, status: 'available', rating: 4.8, nextSlot: 'Today, 10:30 AM', featured: true, qualifications: 'MBBS, MD, DM (Cardiology)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 800, bio: 'Demo profile. Interventional cardiology and preventive heart care.' },
+  { id: 'vrh2', hospitalId: 'vishwaraj', name: 'Dr. Nikhil Deshpande', specialty: 'Orthopedics', state: 'Maharashtra', experience: 11, status: 'available', rating: 4.7, nextSlot: 'Today, 12:00 PM', featured: false, qualifications: 'MBBS, MS (Orthopedics)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 700, bio: 'Demo profile. Joint replacement and sports injury care.' },
+  { id: 'vrh3', hospitalId: 'vishwaraj', name: 'Dr. Sneha Pawar', specialty: 'General Medicine', state: 'Maharashtra', experience: 9, status: 'available', rating: 4.6, nextSlot: 'Today, 2:00 PM', featured: false, qualifications: 'MBBS, MD (General Medicine)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 500, bio: 'Demo profile. Everyday illness and chronic disease follow-ups.' },
+  { id: 'vrh4', hospitalId: 'vishwaraj', name: 'Dr. Rohan Jadhav', specialty: 'Pediatrics', state: 'Maharashtra', experience: 12, status: 'available', rating: 4.8, nextSlot: 'Today, 3:30 PM', featured: false, qualifications: 'MBBS, MD (Pediatrics)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 550, bio: 'Demo profile. Newborn to adolescent care and immunisation.' },
+  { id: 'vrh5', hospitalId: 'vishwaraj', name: 'Dr. Meghana Shah', specialty: 'Gynaecology', state: 'Maharashtra', experience: 13, status: 'in-surgery', rating: 4.7, nextSlot: 'Tomorrow, 11:00 AM', featured: false, qualifications: 'MBBS, MS (Obstetrics & Gynaecology)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 750, bio: 'Demo profile. Women’s health, antenatal care and screening.' },
+  { id: 'vrh6', hospitalId: 'vishwaraj', name: 'Dr. Sameer Patil', specialty: 'Neurology', state: 'Maharashtra', experience: 15, status: 'available', rating: 4.8, nextSlot: 'Today, 5:00 PM', featured: false, qualifications: 'MBBS, MD, DM (Neurology)', hospital: 'VishwaRaj Hospital, Loni Kalbhor', languages: ['English', 'Hindi', 'Marathi'], fee: 900, bio: 'Demo profile. Migraine, epilepsy and stroke recovery care.' },
 ]
+
+// The demo hospital wired to the ward/doctor console and appointment flow.
+// One constant drives the doctors above, staff login, and console filter —
+// change it here if the demo hospital changes.
+export const DEMO_HOSPITAL = {
+  id: 'vishwaraj',
+  name: 'VishwaRaj Hospital, Loni Kalbhor',
+}
 
 export const bedStats = [
   { id: 'icu', label: 'ICU', total: 20, occupied: 18 },

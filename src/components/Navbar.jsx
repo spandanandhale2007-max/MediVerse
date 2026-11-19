@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Menu, X, Activity, Sun, Moon, LifeBuoy } from 'lucide-react'
+import { Menu, X, Sun, Moon, LifeBuoy, Download } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
 import { useAuth } from '../context/AuthContext'
 import ProfileMenu from './ProfileMenu'
+import BrandGlyph from './BrandGlyph'
+import InstallAppDialog from './InstallAppDialog'
+import { usePwaInstall } from '../hooks/usePwaInstall'
+import { isNativeApp } from '../lib/pwa'
 
 const PATIENT_LINKS = [
   { to: '/', label: 'Home' },
@@ -16,8 +20,7 @@ const PATIENT_LINKS = [
   { to: '/support', label: 'Support' },
 ]
 
-// Staff and admin consoles only mount a handful of routes (see App.jsx), so
-// the nav must not offer patient pages that would just bounce them back.
+// Staff/admin mount only a few routes (see App.jsx); don't link patient pages that would bounce back.
 const STAFF_LINKS = [
   { to: '/ward', label: 'Ward Console' },
   { to: '/hospitals', label: 'Hospitals' },
@@ -36,6 +39,16 @@ export default function Navbar() {
   const { isStaff, isAdmin } = useAuth()
   const links = isStaff ? STAFF_LINKS : isAdmin ? ADMIN_LINKS : PATIENT_LINKS
   const homeTo = isStaff ? '/ward' : isAdmin ? '/admin' : '/'
+  const { canPrompt, installed, promptInstall } = usePwaInstall()
+  const [installOpen, setInstallOpen] = useState(false)
+  const closeInstall = useCallback(() => setInstallOpen(false), [])
+
+  // Use the browser's own install dialog when it offers one (Android Chrome,
+  // desktop Chrome/Edge); otherwise show step-by-step instructions (iPhone).
+  function handleGetApp() {
+    if (canPrompt) promptInstall()
+    else setInstallOpen(true)
+  }
 
   return (
     <header
@@ -48,7 +61,7 @@ export default function Navbar() {
             className="flex h-8 w-8 items-center justify-center rounded-lg"
             style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
           >
-            <Activity size={18} strokeWidth={2.5} />
+            <BrandGlyph size={20} />
           </span>
           <span style={{ color: 'var(--text-primary)' }}>MediVerse</span>
         </NavLink>
@@ -84,6 +97,17 @@ export default function Navbar() {
           >
             <LifeBuoy size={15} /> Support
           </NavLink>
+          {!isNativeApp && !installed && (
+            <button
+              type="button"
+              onClick={handleGetApp}
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
+              title="Install MediVerse as an app on this device"
+            >
+              <Download size={15} /> <span className="hidden sm:inline">Get app</span>
+            </button>
+          )}
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <ProfileMenu />
 
@@ -119,6 +143,8 @@ export default function Navbar() {
           ))}
         </nav>
       )}
+
+      {installOpen && <InstallAppDialog onClose={closeInstall} />}
     </header>
   )
 }

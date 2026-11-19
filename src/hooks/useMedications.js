@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { initialMedications } from '../data/mock'
 
-const STORAGE_KEY = 'mediverse-medications' // { [phone]: Medication[] }
+const STORAGE_KEY = 'mediverse-medications' // { [identity]: Medication[] }
 
 function readMap() {
   if (typeof window === 'undefined') return {}
@@ -14,37 +14,30 @@ function readMap() {
   }
 }
 
-// The medication list used to be plain component state seeded from mock data,
-// so anything a user added disappeared on reload — which is a poor showing for
-// a page whose promise is "never miss a dose".
-//
-// Now persisted, and keyed by phone number for the same reason the health
-// profile is: on a shared device one patient must not see another's
-// medication list. A new account starts from the sample list so the page
-// isn't empty on first visit.
-//
-// Returns a [value, setValue] pair so it drops straight into the existing
-// useState call site.
-export function useMedications(phone) {
+// Persists the med list so added meds survive reload.
+// Keyed by identity: on a shared device one patient must not see another's meds.
+// New accounts start from the sample list so the page isn't empty.
+// Returns a [value, setValue] pair, like useState.
+export function useMedications(identity) {
   const [map, setMap] = useState(readMap)
 
   const meds = useMemo(() => {
-    if (!phone) return initialMedications
-    return map[phone] ?? initialMedications
-  }, [map, phone])
+    if (!identity) return initialMedications
+    return map[identity] ?? initialMedications
+  }, [map, identity])
 
   const setMeds = useCallback(
     (updater) => {
-      if (!phone) return
+      if (!identity) return
       setMap((prev) => {
-        const current = prev[phone] ?? initialMedications
+        const current = prev[identity] ?? initialMedications
         const nextList = typeof updater === 'function' ? updater(current) : updater
-        const next = { ...prev, [phone]: nextList }
+        const next = { ...prev, [identity]: nextList }
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
         return next
       })
     },
-    [phone],
+    [identity],
   )
 
   return [meds, setMeds]

@@ -5,9 +5,8 @@ import { doctors as baseDoctors } from '../data/mock'
 
 const AdminContext = createContext(null)
 
-// Wraps the whole app (not just the admin console) because the public pages
-// have to respect what the admin hid or edited — otherwise "remove this
-// hospital" would only remove it from the admin's own table.
+// Wraps the whole app, not just admin, so public pages also respect
+// what the admin hid or edited (else a hide would only affect the admin table).
 export function AdminProvider({ children }) {
   const store = useAdminStore()
 

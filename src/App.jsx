@@ -1,9 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import BrandGlyph from './components/BrandGlyph'
 import Footer from './components/Footer'
 import LoginGate from './components/LoginGate'
 import ProfileGate from './components/ProfileGate'
 import { useAuth } from './context/AuthContext'
+import { usePointerFx } from './hooks/usePointerFx'
+import EcgBackdrop from './components/EcgBackdrop'
+import ChatAssistant from './components/ChatAssistant'
 import Home from './pages/Home'
 import Appointments from './pages/Appointments'
 import Doctors from './pages/Doctors'
@@ -22,14 +26,34 @@ import AdminDashboard from './pages/AdminDashboard'
 import NotFound from './pages/NotFound'
 
 export default function App() {
-  const { isAuthenticated, hasProfile, isPatient, isStaff, isAdmin } = useAuth()
+  const { isAuthenticated, hasProfile, isPatient, isStaff, isAdmin, restoring } = useAuth()
+  // One delegated pointer listener for the whole app; see the hook for why.
+  usePointerFx()
+
+  // Backdrop wraps every branch (incl. login/profile gates) so the trace runs
+  // from the very first screen.
+  return (
+    <>
+      <EcgBackdrop />
+      <Shell {...{ isAuthenticated, hasProfile, isPatient, isStaff, isAdmin, restoring }} />
+      {/* Patients only — staff/admin have their own consoles. */}
+      {isAuthenticated && isPatient && hasProfile && <ChatAssistant />}
+    </>
+  )
+}
+
+function Shell({ isAuthenticated, hasProfile, isPatient, isStaff, isAdmin, restoring }) {
+  // Session restore is async; showing the gate now would flash a login screen
+  // at returning users before they get signed back in.
+  if (restoring) {
+    return <SessionSplash />
+  }
 
   if (!isAuthenticated) {
     return <LoginGate />
   }
 
-  // Staff and admin get their own consoles. They never pass through the
-  // patient profile gate — name/age/location is a patient concept.
+  // Staff/admin get their own consoles and skip the patient profile gate.
   if (isStaff || isAdmin) {
     return (
       <div className="flex min-h-full flex-col">
@@ -48,7 +72,7 @@ export default function App() {
     )
   }
 
-  // Patient: ask for details only the first time this number signs in.
+  // Patient: ask for profile details only on this number's first sign-in.
   if (isPatient && !hasProfile) {
     return <ProfileGate />
   }
@@ -75,6 +99,19 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+    </div>
+  )
+}
+
+// Shown briefly while the stored session loads. A spinner that flashes and
+// vanishes reads as a glitch, so use a steady pulse on the brand mark instead.
+function SessionSplash() {
+  return (
+    <div className="flex min-h-full items-center justify-center p-6">
+      <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+        <BrandGlyph size={22} className="animate-pulse" style={{ color: 'var(--brand)' }} />
+        <span className="text-sm font-medium">Restoring your session…</span>
+      </div>
     </div>
   )
 }

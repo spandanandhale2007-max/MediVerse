@@ -23,12 +23,11 @@ function bmiOf(weight, height) {
 
 export default function Medications() {
   const { auth, profile } = useAuth()
-  // Scoped to the signed-in number — clinical data must never leak between
-  // accounts sharing a device.
-  const { healthProfile, hasHealthProfile, saveHealthProfile } = useHealthProfile(auth?.phone)
+  // Scoped to the signed-in account — clinical data must never leak between accounts on a shared device.
+  const { healthProfile, hasHealthProfile, saveHealthProfile } = useHealthProfile(auth?.email)
   const [editingProfile, setEditingProfile] = useState(false)
 
-  const [meds, setMeds] = useMedications(auth?.phone)
+  const [meds, setMeds] = useMedications(auth?.email)
   const [showForm, setShowForm] = useState(false)
   const [draft, setDraft] = useState({ name: '', schedule: '', remaining: 10 })
 
@@ -51,8 +50,7 @@ export default function Medications() {
     setShowForm(false)
   }
 
-  // First visit (or an explicit edit) → collect the health history before
-  // showing the tracker, so reminders and interaction flags have context.
+  // First visit (or an edit) collects health history before the tracker, so reminders and flags have context.
   if (!hasHealthProfile || editingProfile) {
     return (
       <>

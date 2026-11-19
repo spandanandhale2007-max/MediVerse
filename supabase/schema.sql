@@ -42,12 +42,21 @@ as $$ select public.current_role() = 'admin'; $$;
 
 -- Everyone signing up starts as a patient. Promotion to staff/admin is a
 -- deliberate manual step in the dashboard — never self-service.
+--
+-- Also seeds a profile row carrying the phone number Supabase verified, so
+-- the app has it without a second round trip and ambulance callbacks work
+-- from the moment someone signs up.
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
   insert into public.user_roles (user_id, role) values (new.id, 'patient')
   on conflict (user_id) do nothing;
+
+  insert into public.profiles (user_id, phone)
+  values (new.id, coalesce(new.phone, new.raw_user_meta_data->>'phone'))
+  on conflict (user_id) do nothing;
+
   return new;
 end;
 $$;

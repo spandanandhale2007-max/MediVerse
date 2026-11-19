@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Activity,
-  MessageCircle,
+  Mail,
   ShieldCheck,
   ArrowLeft,
   RefreshCw,
@@ -11,32 +10,25 @@ import {
   ShieldHalf,
   AlertTriangle,
 } from 'lucide-react'
-import { requestOtp, confirmOtp } from '../lib/otp'
+import { requestOtp, confirmOtp, isValidEmail, normaliseEmail, isDemoOtp } from '../lib/otp'
 import { ROLE_LIST, demoAccountsFor, verifyStaffCredentials } from '../lib/auth'
 import { useAuth } from '../context/AuthContext'
 import PasswordInput from './PasswordInput'
+import BrandGlyph from './BrandGlyph'
 
-const COUNTRY_CODE = '+91'
 const RESEND_SECONDS = 30
 const OTP_LENGTH = 6
 
 const ROLE_ICONS = { patient: UserRound, staff: Stethoscope, admin: ShieldHalf }
 
-function isValidPhone(digits) {
-  return /^[6-9]\d{9}$/.test(digits)
-}
-
 export default function LoginGate() {
   const { login, loginAs } = useAuth()
-  // Signing in has to land you on your own home screen. Without this the
-  // router keeps whatever URL was open before — so someone who was last on
-  // /hospitals, or who followed a deep link, got dropped straight there
-  // instead of the home page.
+  // After sign-in, send users to their home screen instead of the last URL/deep link.
   const navigate = useNavigate()
-  // role | phone | otp | credentials
+  // role | email | otp | credentials
   const [step, setStep] = useState('role')
   const [role, setRole] = useState(null)
-  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''))
   const [creds, setCreds] = useState({ userId: '', password: '' })
   const [loading, setLoading] = useState(false)
@@ -45,7 +37,8 @@ export default function LoginGate() {
   const [resendIn, setResendIn] = useState(0)
   const otpRefs = useRef([])
 
-  const fullPhone = `${COUNTRY_CODE}${phone}`
+  // Normalised so "Spandan@Gmail.com" and "spandan@gmail.com" are one account.
+  const cleanEmail = normaliseEmail(email)
 
   useEffect(() => {
     if (resendIn <= 0) return
@@ -56,7 +49,7 @@ export default function LoginGate() {
   function chooseRole(r) {
     setRole(r)
     setError('')
-    setStep(r.method === 'otp' ? 'phone' : 'credentials')
+    setStep(r.method === 'otp' ? 'email' : 'credentials')
   }
 
   function backToRoles() {
@@ -68,40 +61,86 @@ export default function LoginGate() {
 
   async function sendOtp() {
     setError('')
-    if (!isValidPhone(phone)) {
-      setError('Enter a valid 10-digit mobile number.')
+    if (!isValidEmail(email)) {
+      setError('Enter a valid email address.')
       return
     }
     setLoading(true)
     try {
-      const result = await requestOtp(fullPhone)
+      const result = await requestOtp(cleanEmail)
       setDevCode(result.devCode ?? '')
       setStep('otp')
       setResendIn(RESEND_SECONDS)
       setOtp(Array(OTP_LENGTH).fill(''))
       setTimeout(() => otpRefs.current[0]?.focus(), 50)
-    } catch {
-      setError("Couldn't send the OTP right now. Please try again.")
+    } catch (err) {
+      // Show the real error (e.g. rate limit, unconfigured project) — a generic
+      // "try again" would trap the user in a loop that can't succeed.
+      setError(err?.message || "Couldn't send the code right now. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
-  function handlePhoneSubmit(e) {
+  function handleEmailSubmit(e) {
     e.preventDefault()
     sendOtp()
   }
 
-  function handleOtpChange(index, value) {
-    const digit = value.replace(/\D/g, '').slice(-1)
+  // Fill boxes with `digits` starting at `startIndex`, then focus the last one filled.
+  function fillOtpFrom(startIndex, digits) {
+    if (!digits) return
     setOtp((prev) => {
       const next = [...prev]
-      next[index] = digit
+      for (let i = 0; i < digits.length && startIndex + i < OTP_LENGTH; i += 1) {
+        next[startIndex + i] = digits[i]
+      }
       return next
     })
-    if (digit && index < OTP_LENGTH - 1) {
-      otpRefs.current[index + 1]?.focus()
+    const landed = Math.min(startIndex + digits.length, OTP_LENGTH) - 1
+    otpRefs.current[landed]?.focus()
+  }
+
+  function handleOtpChange(index, value) {
+    const digits = value.replace(/\D/g, '')
+
+    if (!digits) {
+      setOtp((prev) => {
+        const next = [...prev]
+        next[index] = ''
+        return next
+      })
+      return
     }
+
+    // Correcting a box that already holds a digit: the box now contains the old
+    // digit plus the one just typed. Keep only the newly typed one, so editing a
+    // filled box isn't mistaken for a paste (which would scramble the whole code).
+    if (digits.length === 2 && otp[index] && (digits[0] === otp[index] || digits[1] === otp[index])) {
+      const typed = digits[0] === otp[index] ? digits[1] : digits[0]
+      setOtp((prev) => {
+        const next = [...prev]
+        next[index] = typed
+        return next
+      })
+      if (index < OTP_LENGTH - 1) otpRefs.current[index + 1]?.focus()
+      return
+    }
+
+    // Several digits at once = a paste that arrived via an input event (common on
+    // mobile, where the paste event may not fire). Fill the whole code from box 1.
+    if (digits.length > 1) {
+      fillOtpFrom(0, digits.slice(0, OTP_LENGTH))
+      return
+    }
+
+    // Normal single-digit typing.
+    setOtp((prev) => {
+      const next = [...prev]
+      next[index] = digits
+      return next
+    })
+    if (index < OTP_LENGTH - 1) otpRefs.current[index + 1]?.focus()
   }
 
   function handleOtpKeyDown(index, e) {
@@ -110,12 +149,13 @@ export default function LoginGate() {
     }
   }
 
+  // Real paste events (desktop): listener on the row catches a paste into any
+  // box and fills from the first.
   function handleOtpPaste(e) {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH)
-    if (!text) return
+    const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH)
+    if (!digits) return
     e.preventDefault()
-    setOtp(Array.from({ length: OTP_LENGTH }, (_, i) => text[i] ?? ''))
-    otpRefs.current[Math.min(text.length, OTP_LENGTH - 1)]?.focus()
+    fillOtpFrom(0, digits)
   }
 
   async function handleVerify(e) {
@@ -128,10 +168,10 @@ export default function LoginGate() {
     setError('')
     setLoading(true)
     try {
-      const ok = await confirmOtp(fullPhone, code)
+      const ok = await confirmOtp(cleanEmail, code)
       if (ok) {
         navigate('/', { replace: true })
-        login(fullPhone)
+        login(cleanEmail)
       } else {
         setError('That code is incorrect or has expired. Try again.')
         setOtp(Array(OTP_LENGTH).fill(''))
@@ -174,7 +214,7 @@ export default function LoginGate() {
             className="flex h-11 w-11 items-center justify-center rounded-xl"
             style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
           >
-            <Activity size={22} strokeWidth={2.5} />
+            <BrandGlyph size={24} />
           </span>
           <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             MediVerse
@@ -182,7 +222,7 @@ export default function LoginGate() {
         </div>
 
         <div className="card p-6">
-          {/* ------------------------------------------------ role chooser */}
+          {/* role chooser */}
           {step === 'role' && (
             <div>
               <h1 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -224,38 +264,38 @@ export default function LoginGate() {
             </div>
           )}
 
-          {/* ------------------------------------------- patient: phone step */}
-          {step === 'phone' && (
-            <form onSubmit={handlePhoneSubmit}>
+          {/* patient: email step */}
+          {step === 'email' && (
+            <form onSubmit={handleEmailSubmit}>
               <BackLink onClick={backToRoles} label="Choose a different role" />
               <h1 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Login to continue
               </h1>
               <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                We'll verify it's you with a one-time code on WhatsApp. If you've signed in before, we'll bring your
-                details back automatically.
+                We'll email you a one-time code. If you've signed in before, we'll bring your details back
+                automatically.
               </p>
 
-              <label className="mb-1 mt-5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                Mobile number
+              <label htmlFor="login-email" className="mb-1 mt-5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                Email address
               </label>
               <div
                 className="flex items-center overflow-hidden rounded-lg"
                 style={{ border: '1px solid var(--border)', background: 'var(--surface-1)' }}
               >
-                <span
-                  className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium"
-                  style={{ color: 'var(--text-secondary)', borderRight: '1px solid var(--border)' }}
-                >
-                  {COUNTRY_CODE}
+                <span className="flex items-center px-3" style={{ color: 'var(--text-muted)' }}>
+                  <Mail size={16} />
                 </span>
                 <input
+                  id="login-email"
                   autoFocus
-                  inputMode="numeric"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="98765 43210"
-                  className="w-full bg-transparent px-3 py-2.5 text-sm outline-none"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-transparent py-2.5 pr-3 text-sm outline-none"
                   style={{ color: 'var(--text-primary)' }}
                 />
               </div>
@@ -268,7 +308,7 @@ export default function LoginGate() {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
                 style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
               >
-                <MessageCircle size={16} /> {loading ? 'Sending code...' : 'Send OTP on WhatsApp'}
+                <Mail size={16} /> {loading ? 'Sending code...' : 'Email me a code'}
               </button>
 
               <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -277,40 +317,47 @@ export default function LoginGate() {
             </form>
           )}
 
-          {/* --------------------------------------------- patient: otp step */}
+          {/* patient: otp step */}
           {step === 'otp' && (
             <form onSubmit={handleVerify}>
               <BackLink
                 onClick={() => {
-                  setStep('phone')
+                  setStep('email')
                   setError('')
                 }}
-                label="Change number"
+                label="Change email"
               />
 
               <h1 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Enter the code
               </h1>
-              <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Sent via WhatsApp to <span style={{ color: 'var(--text-primary)' }}>{fullPhone}</span>
+              <p className="mt-1 break-all text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Sent to <span style={{ color: 'var(--text-primary)' }}>{cleanEmail}</span>
               </p>
 
-              {import.meta.env.DEV && devCode && (
+              {(import.meta.env.DEV || isDemoOtp) && devCode && (
                 <p
                   className="mt-3 rounded-lg px-3 py-2 text-xs"
                   style={{ color: 'var(--brand)', background: 'var(--brand-soft-2)' }}
                 >
-                  Dev preview only — no real WhatsApp message was sent. Your code is <strong>{devCode}</strong>.
+                  {isDemoOtp ? 'Demo mode: no email is sent.' : 'Dev preview only: no real email was sent.'} Your code is{' '}
+                  <strong>{devCode}</strong>.
                 </p>
               )}
 
-              <div className="mt-4 flex justify-between gap-2" onPaste={handleOtpPaste}>
+              <div
+                className="mt-4 flex justify-between gap-2"
+                onPaste={handleOtpPaste}
+                role="group"
+                aria-label={`${OTP_LENGTH}-digit verification code`}
+              >
                 {otp.map((digit, i) => (
                   <input
                     key={i}
                     ref={(el) => (otpRefs.current[i] = el)}
                     inputMode="numeric"
-                    maxLength={1}
+                    autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                    aria-label={`Digit ${i + 1} of ${OTP_LENGTH}`}
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
@@ -342,14 +389,14 @@ export default function LoginGate() {
                     className="flex items-center gap-1 font-medium"
                     style={{ color: 'var(--brand)' }}
                   >
-                    <RefreshCw size={12} /> Resend OTP
+                    <RefreshCw size={12} /> Resend code
                   </button>
                 )}
               </div>
             </form>
           )}
 
-          {/* ------------------------------------- staff / admin credentials */}
+          {/* staff / admin credentials */}
           {step === 'credentials' && role && (
             <form onSubmit={handleCredentials}>
               <BackLink onClick={backToRoles} label="Choose a different role" />
@@ -361,11 +408,12 @@ export default function LoginGate() {
                 {role.blurb}
               </p>
 
-              <label className="mb-1 mt-5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              <label htmlFor="staff-userid" className="mb-1 mt-5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
                 {role.idLabel}
               </label>
               <input
                 autoFocus
+                id="staff-userid"
                 value={creds.userId}
                 onChange={(e) => setCreds((c) => ({ ...c, userId: e.target.value }))}
                 placeholder={role.idPlaceholder}
@@ -373,10 +421,11 @@ export default function LoginGate() {
                 style={{ border: '1px solid var(--border)', background: 'var(--surface-1)', color: 'var(--text-primary)' }}
               />
 
-              <label className="mb-1 mt-4 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              <label htmlFor="staff-password" className="mb-1 mt-4 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
                 Password
               </label>
               <PasswordInput
+                id="staff-password"
                 value={creds.password}
                 onChange={(e) => setCreds((c) => ({ ...c, password: e.target.value }))}
               />
@@ -393,10 +442,10 @@ export default function LoginGate() {
               </button>
 
               {/* Demo-only. These constants ship in the bundle — see lib/auth.js */}
-              {import.meta.env.DEV && (
+              {import.meta.env.DEV && demoAccountsFor(role.id).length > 0 && (
                 <div
                   className="mt-4 rounded-lg px-3 py-2.5 text-xs"
-                  style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: '#9a6a00' }}
+                  style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: 'var(--warn-fg)' }}
                 >
                   <p className="flex items-start gap-1.5 font-semibold">
                     <AlertTriangle size={13} className="mt-0.5 shrink-0" strokeWidth={2.5} />
@@ -408,7 +457,7 @@ export default function LoginGate() {
                   <ul className="mt-1.5 space-y-0.5">
                     {demoAccountsFor(role.id).map((a) => (
                       <li key={a.userId}>
-                        <strong>{a.userId}</strong> / {a.password}
+                        <strong>{a.userId}</strong> / {a.hint}
                       </li>
                     ))}
                   </ul>

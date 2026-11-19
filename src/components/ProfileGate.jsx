@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, MapPin, UserRound } from 'lucide-react'
+import { MapPin, UserRound, Phone } from 'lucide-react'
+import BrandGlyph from './BrandGlyph'
 import { useAuth } from '../context/AuthContext'
 
 export default function ProfileGate() {
   const { saveProfile } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ name: '', age: '', location: '' })
+  // Phone is required (not optional): ambulance dispatch needs a callback number.
+  const [form, setForm] = useState({ name: '', age: '', location: '', phone: '' })
   const [error, setError] = useState('')
 
   function handleChange(e) {
@@ -29,10 +31,19 @@ export default function ProfileGate() {
       setError('Enter where you stay — this helps us show hospitals near you.')
       return
     }
+    if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      setError('Enter a valid 10-digit mobile number — an ambulance crew needs a way to call you back.')
+      return
+    }
     setError('')
     // Land on the home page, not whatever URL happened to be open.
     navigate('/', { replace: true })
-    saveProfile({ name: form.name.trim(), age, location: form.location.trim() })
+    saveProfile({
+      name: form.name.trim(),
+      age,
+      location: form.location.trim(),
+      phone: `+91${form.phone}`,
+    })
   }
 
   return (
@@ -46,7 +57,7 @@ export default function ProfileGate() {
             className="flex h-11 w-11 items-center justify-center rounded-xl"
             style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
           >
-            <Activity size={22} strokeWidth={2.5} />
+            <BrandGlyph size={24} />
           </span>
           <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             MediVerse
@@ -115,6 +126,34 @@ export default function ProfileGate() {
                 style={{ color: 'var(--text-primary)' }}
               />
             </div>
+
+            <label className="mb-1 mt-4 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              Mobile number
+            </label>
+            <div
+              className="flex items-center overflow-hidden rounded-lg"
+              style={{ border: '1px solid var(--border)', background: 'var(--surface-1)' }}
+            >
+              <span
+                className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium"
+                style={{ color: 'var(--text-secondary)', borderRight: '1px solid var(--border)' }}
+              >
+                <Phone size={14} /> +91
+              </span>
+              <input
+                name="phone"
+                inputMode="numeric"
+                autoComplete="tel"
+                value={form.phone}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                placeholder="98765 43210"
+                className="w-full bg-transparent px-3 py-2.5 text-sm outline-none"
+                style={{ color: 'var(--text-primary)' }}
+              />
+            </div>
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+              Used only so an ambulance crew or the hospital can call you back.
+            </p>
 
             {error && (
               <p className="mt-3 text-xs" style={{ color: 'var(--status-critical)' }}>

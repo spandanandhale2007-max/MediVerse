@@ -1,11 +1,8 @@
 import { AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react'
 
-// The MediVerse doctor roster in src/data/mock.js is invented sample data —
-// nobody in it is a real practitioner. That is fine for a demo, but the app
-// presents ratings, fees and appointment slots, which read exactly like real
-// listings. So say so plainly wherever those doctors are shown, and point
-// users at the one place that holds genuine, verifiable credentials: the
-// National Medical Commission's Indian Medical Register.
+// Doctors in src/data/mock.js are fake, but their ratings/fees/slots look
+// real. Warn users wherever doctors are shown, and point them to the real
+// source of verified credentials: the govt's Indian Medical Register.
 export const IMR_URL = 'https://www.nmc.org.in/information-desk/indian-medical-register/'
 
 export default function DoctorDataNotice({ className = '' }) {
@@ -13,7 +10,7 @@ export default function DoctorDataNotice({ className = '' }) {
     <div className={`card overflow-hidden p-0 ${className}`}>
       <div
         className="flex items-start gap-2.5 px-4 py-3 text-xs"
-        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: '#9a6a00' }}
+        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: 'var(--warn-fg)' }}
       >
         <AlertTriangle size={15} className="mt-0.5 shrink-0" strokeWidth={2.5} />
         <p>

@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { UserRound, FileText, LogOut, ChevronDown, LayoutDashboard, Stethoscope } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-// Avatar + name + dropdown, replacing the bare buttons that used to sit in
-// the top-right. There's no photo upload, so the avatar is initials on a
-// generated colour — the standard fallback, and stable per person because the
-// hue is derived from their name rather than picked at random.
+// No photo upload: avatar is initials on a colour derived from the name,
+// so each person gets the same hue every time.
 function initialsOf(name) {
   if (!name) return '?'
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -27,8 +25,7 @@ export default function ProfileMenu() {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
 
-  // Close on outside click and on Escape — a menu you can't dismiss without
-  // clicking one of its items is a trap.
+  // Close on outside click or Escape.
   useEffect(() => {
     if (!open) return
     function onPointerDown(e) {
@@ -49,8 +46,8 @@ export default function ProfileMenu() {
 
   const displayName = isPatient ? (profile?.name ?? 'Your profile') : (auth.name ?? auth.userId ?? 'Account')
   const firstName = displayName.trim().split(/\s+/)[0]
-  const subtitle = isPatient ? auth.phone : isAdmin ? 'Administrator' : 'Ward / Doctor'
-  const hue = hueOf(displayName + (auth.phone ?? auth.userId ?? ''))
+  const subtitle = isPatient ? auth.email : isAdmin ? 'Administrator' : 'Ward / Doctor'
+  const hue = hueOf(displayName + (auth.email ?? auth.userId ?? ''))
 
   const items = []
   if (isPatient) {

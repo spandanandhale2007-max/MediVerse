@@ -6,14 +6,17 @@ import Badge from '../components/Badge'
 import { useAuth } from '../context/AuthContext'
 import { departments, appointmentSlots } from '../data/mock'
 import { useDirectory } from '../context/AdminContext'
+import { useAppointments } from '../context/AppointmentsContext'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
 }
 
 export default function Appointments() {
-  const { profile } = useAuth()
+  const { profile, identity } = useAuth()
   const { doctors } = useDirectory() // a doctor hidden by an admin can't be booked
+  // Shared store, so a booking reaches the doctor/ward console (not just local state).
+  const { book, cancel, forPatient } = useAppointments()
   const [searchParams] = useSearchParams()
   const [form, setForm] = useState({
     name: profile?.name ?? '',
@@ -33,18 +36,10 @@ export default function Appointments() {
       setForm((f) => ({ ...f, department: doctor.specialty, doctorId: doctor.id }))
     }
   }, [searchParams, doctors])
-  const [appointments, setAppointments] = useState([
-    {
-      id: 'seed-1',
-      name: 'Ravi Patil',
-      department: 'Cardiology',
-      doctorName: 'Dr. Anjali Rao',
-      date: todayISO(),
-      slot: '4:30 PM',
-      status: 'confirmed',
-    },
-  ])
   const [confirmed, setConfirmed] = useState(false)
+
+  // This patient's own bookings, pulled from the shared store.
+  const appointments = forPatient(identity)
 
   const availableDoctors = doctors.filter((d) => d.specialty === form.department)
 
@@ -57,23 +52,26 @@ export default function Appointments() {
     e.preventDefault()
     if (!form.name.trim()) return
     const doctor = doctors.find((d) => d.id === form.doctorId)
-    const newAppt = {
-      id: `a-${Date.now()}`,
-      name: form.name.trim(),
+    book({
+      patientName: form.name.trim(),
+      patientEmail: identity ?? '',
+      // Tagging the booking with the doctor's hospital is what lets that
+      // hospital's console pick it up. "Any available doctor" has none.
+      hospitalId: doctor?.hospitalId ?? null,
+      hospitalName: doctor?.hospital ?? '',
       department: form.department,
+      doctorId: doctor?.id ?? '',
       doctorName: doctor ? doctor.name : 'Any available doctor',
       date: form.date,
       slot: form.slot,
-      status: 'confirmed',
-    }
-    setAppointments((list) => [newAppt, ...list])
+    })
     setConfirmed(true)
     setForm((f) => ({ ...f, name: '', doctorId: '' }))
     setTimeout(() => setConfirmed(false), 3500)
   }
 
   function cancelAppointment(id) {
-    setAppointments((list) => list.map((a) => (a.id === id ? { ...a, status: 'cancelled' } : a)))
+    cancel(id)
   }
 
   return (
@@ -213,7 +211,7 @@ export default function Appointments() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {a.name} &middot; {a.department}
+                    {a.patientName} &middot; {a.department}
                   </p>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {a.doctorName}

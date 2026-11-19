@@ -3,8 +3,7 @@ import { History, EyeOff, Eye, PencilLine, Undo2, RotateCcw, LifeBuoy, Siren } f
 import { useDirectory } from '../../context/AdminContext'
 import { readReports } from '../../lib/reports'
 
-// An admin console without an audit trail is just a way to change data
-// silently. Every mutation in useAdminStore writes a line here.
+// Audit trail: every mutation in useAdminStore writes a line here.
 const ACTION_META = {
   'hospital.hide': { icon: EyeOff, label: 'Hid hospital', tone: 'var(--status-critical)' },
   'hospital.restore': { icon: Eye, label: 'Restored hospital', tone: 'var(--status-good)' },
@@ -35,15 +34,13 @@ export default function AdminActivity() {
     }
   }, [refresh])
 
-  // One control log: what admins changed AND what users reported, in the order
-  // it happened. Reading two separate timelines to reconstruct an incident is
-  // exactly the friction an audit log is supposed to remove.
+  // Merge admin changes and user reports into one timeline, newest first.
   const log = useMemo(() => {
     const asEntries = reports.map((r) => ({
       id: `report-${r.id}`,
       action: `report.${r.kind}`,
       label: r.kind === 'emergency' ? `${r.payload.area ?? 'area not given'}` : r.payload.subject || 'No subject',
-      actor: r.submittedBy ? `${r.submittedBy.name ? `${r.submittedBy.name} · ` : ''}${r.submittedBy.phone}` : 'Signed-out visitor',
+      actor: r.submittedBy ? `${r.submittedBy.name ? `${r.submittedBy.name} · ` : ''}${r.submittedBy.email}` : 'Signed-out visitor',
       at: r.at,
       undelivered: !r.delivered,
     }))
@@ -65,7 +62,7 @@ export default function AdminActivity() {
   }
 
   return (
-    <div className="card divide-y overflow-hidden p-0" style={{ borderColor: 'var(--border)' }}>
+    <div className="card divide-y divide-[var(--border)] overflow-hidden p-0" style={{ borderColor: 'var(--border)' }}>
       {log.map((entry) => {
         const meta = ACTION_META[entry.action] ?? { icon: History, label: entry.action, tone: 'var(--text-secondary)' }
         const Icon = meta.icon

@@ -1,11 +1,10 @@
 import { CheckCircle2, AlertTriangle, AlertOctagon, XCircle, Clock } from 'lucide-react'
 
-// Status badges always pair color with an icon + text label — color is never
-// the only signal (colorblind/print-safe by construction).
+// Always pairs color with an icon + text — never color alone (colorblind/print-safe).
 const VARIANTS = {
   good: { color: 'var(--status-good)', bg: 'color-mix(in srgb, var(--status-good) 14%, transparent)', Icon: CheckCircle2 },
-  warning: { color: '#9a6a00', bg: 'color-mix(in srgb, var(--status-warning) 22%, transparent)', Icon: AlertTriangle },
-  serious: { color: '#a5461f', bg: 'color-mix(in srgb, var(--status-serious) 20%, transparent)', Icon: AlertOctagon },
+  warning: { color: 'var(--warn-fg)', bg: 'color-mix(in srgb, var(--status-warning) 22%, transparent)', Icon: AlertTriangle },
+  serious: { color: 'var(--serious-fg)', bg: 'color-mix(in srgb, var(--status-serious) 20%, transparent)', Icon: AlertOctagon },
   critical: { color: 'var(--status-critical)', bg: 'color-mix(in srgb, var(--status-critical) 14%, transparent)', Icon: XCircle },
   neutral: { color: 'var(--text-secondary)', bg: 'var(--surface-2)', Icon: Clock },
 }

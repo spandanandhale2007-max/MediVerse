@@ -28,10 +28,14 @@
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
 
+  /* Readable text for "warning"/"serious" chips and notices. Dark amber/rust on
+     the light amber tint here; overridden lighter under dark theme for contrast. */
+  --warn-fg: #9a6a00;
+  --serious-fg: #a5461f;
+
   --success-text: #006300;
 
-  /* Homepage hero banner — deliberately stays a rich, dark gradient in both
-     themes (like a promo banner), so its text is always white regardless. */
+  /* Homepage hero: dark gradient in both themes, so its text always stays white. */
   --hero-banner-bg: linear-gradient(135deg, #14615c 0%, #175f8f 55%, #2a4a86 100%);
 }
 
@@ -59,6 +63,8 @@
       linear-gradient(160deg, #0b1f2b 0%, #0f2a30 45%, #0a1a22 100%);
     --hero-banner-bg: linear-gradient(135deg, #0f2e2b 0%, #123a3a 45%, #17324f 100%);
 
+    --warn-fg: #f3c04f;
+    --serious-fg: #f39b73;
     --success-text: #0ca30c;
   }
 }
@@ -86,6 +92,8 @@
     linear-gradient(160deg, #0b1f2b 0%, #0f2a30 45%, #0a1a22 100%);
   --hero-banner-bg: linear-gradient(135deg, #0f2e2b 0%, #123a3a 45%, #17324f 100%);
 
+  --warn-fg: #f3c04f;
+  --serious-fg: #f39b73;
   --success-text: #0ca30c;
 }
 
@@ -108,9 +116,8 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s ease, color 0.25s ease;
 
-  /* Site-wide: no click-drag/double-click text selection, and no iOS
-     long-press "Copy" callout. Form fields opt back in below — you still
-     need to select text to edit it. */
+  /* Block text selection and the iOS long-press "Copy" callout site-wide.
+     Form fields opt back in below (you still need to select text to edit). */
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -136,13 +143,9 @@ a {
   border-radius: 16px;
 }
 
-/* ---------------------------------------------------------------
-   Interactive "pop" — buttons and pill/rounded links lift and grow
-   slightly on hover, and press in on click. Scoped to elements that
-   carry a rounded-* utility so full-width list rows, accordion
-   headers and invisible modal backdrops are left alone. Opt out
-   anywhere with `no-pop`.
-   --------------------------------------------------------------- */
+/* Interactive "pop": rounded buttons/links lift and grow on hover, press in on
+   click. Scoped to rounded-* elements so list rows, accordion headers and modal
+   backdrops are left alone. Opt out with `no-pop`. */
 @media (prefers-reduced-motion: no-preference) {
   button[class*="rounded-"]:not(:disabled):not(.no-pop),
   a[class*="rounded-"]:not(.no-pop) {
@@ -167,8 +170,7 @@ a {
     transition-duration: 0.08s;
   }
 
-  /* A full-width button growing 4.5% shifts its edges a long way, so
-     wide targets get a gentler nudge than small pills do. */
+  /* Wide (full-width) buttons get a gentler nudge — 4.5% growth moves their edges too far. */
   button[class*="w-full"][class*="rounded-"]:not(:disabled):not(.no-pop):hover,
   a[class*="w-full"][class*="rounded-"]:not(.no-pop):hover,
   button[class*="w-full"][class*="rounded-"]:not(:disabled):not(.no-pop):focus-visible,
@@ -176,8 +178,7 @@ a {
     transform: translateY(-2px) scale(1.015);
   }
 
-  /* Whole-card targets (feature tiles, doctor cards) lift rather than
-     grow — scaling a large surface reads as a glitch, not a nudge. */
+  /* Card targets lift instead of growing — scaling a large surface looks like a glitch. */
   a.card,
   button.card {
     transition:
@@ -289,4 +290,477 @@ a {
 
 ::selection {
   background: var(--brand-soft);
+}
+
+/* ---------------------------------------------------------------- HScroll
+   Horizontal rails (see components/HScroll.jsx). Snap gives the card-by-card
+   feel; the hidden scrollbar keeps the rail clean, but the element is still a
+   real scroll container so touch, trackpad and keyboard all behave natively. */
+.hscroll {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* Cards would otherwise clip against the container edge on small screens. */
+  scroll-padding-left: 0.25rem;
+}
+.hscroll::-webkit-scrollbar {
+  display: none;
+}
+.hscroll > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+/* A visible focus ring on the rail itself would be noise — the cards inside
+   carry their own focus styles, and those are what a keyboard user lands on. */
+.hscroll:focus {
+  outline: none;
+}
+.hscroll:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hscroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* ------------------------------------------------------ pointer effects
+   Card spotlight + magnetic buttons (see hooks/usePointerFx.js).
+
+   Gated behind .fx-on, which the hook adds only when the device can hover
+   AND the user hasn't asked for reduced motion. Without that class none of
+   this applies, so touch users and motion-sensitive users get the plain
+   design rather than a degraded version of a fancy one. */
+
+.fx-on .card {
+  position: relative;
+  isolation: isolate;
+}
+
+/* The glow itself. A pseudo-element rather than a background on .card so it
+   composites on its own layer and never disturbs the card's own styling. */
+.fx-on .card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--brand) 16%, transparent),
+    transparent 65%
+  );
+}
+
+.fx-on .card.fx-spotlight::after {
+  opacity: 1;
+}
+
+/* Magnetic elements. The hook writes the translate; the transition handles
+   the release, so letting go eases back instead of snapping. */
+.fx-on [data-magnetic] {
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* While actively pulled the hook overwrites transform every frame, so a long
+   transition would fight it. Kept short enough to feel immediate. */
+.fx-on [data-magnetic]:hover {
+  transition: transform 90ms linear;
+}
+
+/* ------------------------------------------------------------ ECG backdrop
+   Live heartbeat trace behind the page (components/EcgBackdrop.jsx).
+
+   Colour is --status-critical, the red already used for emergency states, so
+   the trace belongs to the existing palette rather than adding a new hue. Two
+   layers run at different speeds; the difference reads as depth. */
+.ecg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Fade top and bottom so the trace emerges and dissolves rather than being
+     cut off by the viewport edge. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+}
+
+/* A soft red bloom across the middle band. The beats cross it as they travel,
+   so the line appears to brighten through the centre — it reads as lit rather
+   than merely drawn, which is the difference between a monitor and a border. */
+.ecg-bloom {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      900px 300px at 50% 50%,
+      color-mix(in srgb, var(--status-critical) 12%, transparent),
+      transparent 70%
+    );
+}
+
+/* Two copies side by side; translating by exactly -50% lands copy 2 where
+   copy 1 started, so the loop has no seam. */
+.ecg-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  width: 200%;
+  transform: translate3d(0, -50%, 0);
+  animation: ecg-sweep linear infinite;
+  will-change: transform;
+}
+
+/* Back layer: taller, fainter, slower — the parallax partner. */
+.ecg-track--back {
+  height: 56vh;
+  min-height: 320px;
+  animation-duration: 38s;
+  opacity: 0.55;
+}
+
+.ecg-track--front {
+  height: 40vh;
+  min-height: 240px;
+  animation-duration: 22s;
+}
+
+.ecg-svg {
+  width: 50%;
+  height: 100%;
+}
+
+.ecg-path {
+  stroke: var(--status-critical);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.16;
+}
+
+.ecg-track--front .ecg-path {
+  stroke-width: 2.4;
+  opacity: 0.22;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--status-critical) 45%, transparent));
+}
+
+/* Dark theme: the trace reads as a monitor glow, so it carries more presence
+   and a stronger bloom without touching text contrast. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .ecg-path {
+    opacity: 0.24;
+  }
+  :root:not([data-theme='light']) .ecg-track--front .ecg-path {
+    opacity: 0.34;
+    filter: drop-shadow(0 0 9px color-mix(in srgb, var(--status-critical) 70%, transparent));
+  }
+  :root:not([data-theme='light']) .ecg-bloom {
+    background: radial-gradient(
+      900px 300px at 50% 50%,
+      color-mix(in srgb, var(--status-critical) 18%, transparent),
+      transparent 70%
+    );
+  }
+}
+:root[data-theme='dark'] .ecg-path {
+  opacity: 0.24;
+}
+:root[data-theme='dark'] .ecg-track--front .ecg-path {
+  opacity: 0.34;
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--status-critical) 70%, transparent));
+}
+:root[data-theme='dark'] .ecg-bloom {
+  background: radial-gradient(
+    900px 300px at 50% 50%,
+    color-mix(in srgb, var(--status-critical) 18%, transparent),
+    transparent 70%
+  );
+}
+
+@keyframes ecg-sweep {
+  from {
+    transform: translate3d(0, -50%, 0);
+  }
+  to {
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+
+/* Motion sensitivity: keep the trace, stop the travel. The page still looks
+   like a monitor; it just isn't moving. */
+@media (prefers-reduced-motion: reduce) {
+  .ecg-track {
+    animation: none;
+  }
+}
+
+/* Everything the user actually reads must sit above the backdrop.
+
+   TWO exclusions, and both are load-bearing. App renders fragments, so every
+   overlay — the ECG trace AND the chat assistant — ends up a DIRECT child of
+   #root. `#root > *` has ID specificity (1,0,0) and outranks any class
+   (0,1,0), so it silently overwrites `position: fixed` with `position:
+   relative`. That drops the element into normal flow at the bottom of the
+   page, and on a relative element `right: 1rem` shifts it LEFT rather than
+   anchoring it right — which is exactly how the assistant ended up in the
+   bottom-left corner.
+
+   Anything else added here that needs to be fixed must carry .is-overlay. */
+#root > *:not(.ecg-backdrop):not(.is-overlay) {
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------- skeletons
+   Loading placeholders (components/Skeleton.jsx).
+
+   The shimmer is a wide gradient on a pseudo-element that TRANSLATES across
+   the bone. The common alternative — animating background-position on the
+   element itself — repaints it every frame; with 20 hospital cards on screen
+   that is 20 repaints per frame and the list visibly stutters while loading,
+   which is precisely when the app should feel fastest. transform stays on the
+   compositor. */
+.sk {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+
+.sk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface-card) 85%, transparent),
+    transparent
+  );
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Motion sensitivity: no travelling highlight. A gentle opacity pulse still
+   signals "working" without anything sliding across the screen. */
+@media (prefers-reduced-motion: reduce) {
+  .sk::after {
+    animation: none;
+  }
+  .sk {
+    animation: sk-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes sk-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ------------------------------------------------------- chat assistant
+   Launcher, panel and typing indicator (components/ChatAssistant.jsx).
+   All motion is transform/opacity only, and every animation is switched off
+   under prefers-reduced-motion at the end of this block. */
+
+/* Launcher breathes gently so it reads as present rather than printed. */
+.assistant-launcher {
+  animation: assistant-breathe 3.4s ease-in-out infinite;
+  transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.assistant-launcher:hover {
+  transform: scale(1.08);
+  animation-play-state: paused;
+}
+.assistant-launcher:active {
+  transform: scale(0.94);
+}
+
+@keyframes assistant-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Rings radiating outward. Behind the button and non-interactive, so they
+   never steal the click. */
+.assistant-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--brand);
+  opacity: 0;
+  pointer-events: none;
+  animation: assistant-ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.assistant-ring--delayed {
+  animation-delay: 1.3s;
+}
+
+@keyframes assistant-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  70% { transform: scale(1.75); opacity: 0; }
+  100% { transform: scale(1.75); opacity: 0; }
+}
+
+/* Online dot — a slow pulse, not a blink. Blinking reads as an error. */
+.assistant-online {
+  animation: assistant-online-pulse 2.2s ease-in-out infinite;
+}
+@keyframes assistant-online-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* The eyes are what make the face feel alive — a long hold, then a fast
+   blink, which is roughly how real blinking reads. */
+.bot-eyes {
+  animation: bot-blink 5.5s infinite;
+  transform-origin: center;
+}
+@keyframes bot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* Antenna tip glows while a reply is being composed. */
+.bot-antenna {
+  animation: bot-antenna-pulse 0.9s ease-in-out infinite;
+}
+@keyframes bot-antenna-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Panel and nudge rise into place rather than appearing abruptly. */
+.assistant-panel {
+  animation: assistant-in 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Grows out of the launcher, which now sits at the right edge, vertically
+     centred — so the origin is the right side rather than a corner. */
+  transform-origin: right center;
+}
+@keyframes assistant-in {
+  /* translateY(-50%) is preserved because the panel is vertically centred by
+     a -translate-y-1/2 utility; animating plain translateY would fight it. */
+  from { opacity: 0; transform: translate(12px, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(0, -50%) scale(1); }
+}
+
+.assistant-nudge {
+  animation: assistant-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Typing indicator. */
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--text-muted);
+  animation: typing-bounce 1.1s ease-in-out infinite;
+}
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-launcher,
+  .assistant-ring,
+  .assistant-online,
+  .bot-eyes,
+  .bot-antenna,
+  .assistant-panel,
+  .assistant-nudge,
+  .typing-dot {
+    animation: none;
+  }
+  /* Without the rings animating they would sit as static circles, so hide. */
+  .assistant-ring {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------ hero intro
+   Staggered opening on the home page. Everything animates transform and
+   opacity only, so it runs on the compositor and costs nothing.
+
+   Each piece starts invisible and is revealed by its own delay, so the eye
+   is led: brand name -> tagline -> description -> search -> stats. */
+.hero-in {
+  opacity: 0;
+  animation: hero-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The wordmark reveals letter by letter. Each character carries its own
+   delay via an inline custom property set in the JSX. */
+.hero-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: hero-letter-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes hero-letter-in {
+  from { opacity: 0; transform: translateY(26px) rotate(6deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* The wordmark glows rather than being gradient-filled.
+
+   An earlier version used `background-clip: text` with `color: transparent`
+   on the <h1>. That made the name INVISIBLE: the letters inside animate with
+   a transform, a transformed element paints in its own stacking context, and
+   so the parent's text-clipped background never reached them — while they had
+   already inherited the transparent colour.
+
+   Never make text transparent and rely on an ancestor to paint it back,
+   especially when descendants are animated. This does it with a glow on
+   solid white instead, so the name is legible no matter what the animation
+   is doing. */
+.hero-sheen {
+  color: #fff;
+  text-shadow: 0 2px 24px rgba(255, 255, 255, 0.28);
+  animation: hero-glow 3.6s ease-in-out 1.1s infinite;
+}
+
+@keyframes hero-glow {
+  0%, 100% { text-shadow: 0 2px 24px rgba(255, 255, 255, 0.22); }
+  50% { text-shadow: 0 2px 34px rgba(255, 255, 255, 0.5); }
+}
+
+/* Motion sensitivity: everything is simply present, no reveal, no sweep. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-in,
+  .hero-letter {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+  .hero-sheen {
+    animation: none;
+    color: #fff;
+    text-shadow: 0 2px 24px rgba(255, 255, 255, 0.28);
+  }
 }

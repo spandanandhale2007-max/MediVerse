@@ -10,8 +10,7 @@ import {
 } from 'lucide-react'
 import { doctors, departments } from './mock'
 
-// Everything the homepage search bar can match against, built from the same
-// mock data the rest of the app already uses — one index, no duplication.
+// Homepage search targets, built from existing mock data to avoid duplication.
 export const quickLinks = [
   { type: 'Quick link', label: 'Book an appointment', to: '/appointments', icon: CalendarCheck },
   { type: 'Quick link', label: 'Find a doctor', to: '/doctors', icon: Stethoscope },

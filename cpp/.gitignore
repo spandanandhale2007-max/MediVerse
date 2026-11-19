@@ -1,0 +1,4 @@
+# Build output and the demo's saved bookings
+*.exe
+mediverse
+*.tsv

@@ -14,10 +14,8 @@ const STATUS_MAP = {
   'off-duty': { variant: 'neutral', label: 'Off duty' },
 }
 
-// How many specialists a state actually has in a given field. Nationwide
-// (telehealth) doctors count for every state, which is why this can't just be
-// a plain group-by on `state`. Takes the roster as an argument because an
-// admin can hide doctors, which must shrink these counts too.
+// Count of specialists in a state for a field. Nationwide (telehealth) doctors
+// count for every state, and the roster is passed in so admin-hidden doctors shrink it.
 function countFor(roster, stateName, dept) {
   return roster.filter((d) => d.specialty === dept && (d.state === stateName || d.availableNationwide)).length
 }
@@ -29,10 +27,8 @@ export default function Specialists() {
   const [submitted, setSubmitted] = useState(false)
   const [activeDoctor, setActiveDoctor] = useState(null)
 
-  // The specialty list cascades off the chosen state and offers only fields
-  // that actually have someone in them. Without this, 53 of the 105 possible
-  // state x specialty pairs led to an empty result — the picker was promising
-  // matches it could not deliver.
+  // Specialty options cascade off the chosen state, showing only fields that
+  // have someone — otherwise many state x specialty picks led to empty results.
   const specialtyOptions = useMemo(() => {
     if (!state) return []
     return departments.map((d) => ({ name: d, count: countFor(doctors, state, d) })).filter((d) => d.count > 0)
@@ -52,17 +48,15 @@ export default function Specialists() {
     setSubmitted(true)
   }
 
-  // Doctors physically in that state, plus nationwide/telehealth doctors in
-  // the same specialty regardless of which state was picked.
+  // Doctors in that state, plus nationwide/telehealth doctors in the same specialty.
   const results = submitted
     ? doctors
         .filter((d) => d.specialty === specialty && (d.state === state || d.availableNationwide))
         .sort((a, b) => (b.featured === a.featured ? b.rating - a.rating : b.featured ? 1 : -1))
     : []
 
-  // Independent hospitals in the same state that publish their own consultant
-  // list. We link straight to that list rather than copying it — their page is
-  // always current, and the doctors stay attributed to their own hospital.
+  // Independent hospitals in the state that publish their own consultant list.
+  // We link out instead of copying it — their page stays current and attributed.
   const hospitalDirectories = submitted
     ? realHospitals.filter((h) => h.state === state && h.doctorsUrl)
     : []

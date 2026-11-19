@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MediVerse</string>
+    <string name="title_activity_main">MediVerse</string>
+    <string name="package_name">com.mediverse.app</string>
+    <string name="custom_url_scheme">com.mediverse.app</string>
+</resources>

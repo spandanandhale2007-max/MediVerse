@@ -21,8 +21,7 @@ export default function Doctors() {
   const [department, setDepartment] = useState('All')
   const [activeDoctor, setActiveDoctor] = useState(null)
 
-  // A search from the homepage arrives as ?q=... — pick it up if the user
-  // lands here again with a new query param (e.g. clicking another result).
+  // A homepage search arrives as ?q=... — keep the search box in sync with it.
   useEffect(() => {
     const q = searchParams.get('q')
     if (q !== null) setQuery(q)

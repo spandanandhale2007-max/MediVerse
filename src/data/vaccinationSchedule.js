@@ -1,20 +1,13 @@
-// Lifetime vaccination schedule for India — birth through older adulthood.
+// Lifetime India vaccination schedule (birth to older age).
+// Sources: Govt UIP national schedule, IAP/ACVIP 2023, FOGSI/IAP pregnancy
+// guidance, and general adult guidance (India has no single official adult
+// schedule — flagged where relevant).
 //
-// Sourced from:
-// - Government of India Universal Immunization Programme (UIP) / National
-//   Immunization Schedule, Ministry of Health & Family Welfare (nhm.gov.in)
-// - Indian Academy of Pediatrics (IAP) Advisory Committee on Vaccines and
-//   Immunization Practices (ACVIP) 2023 schedule, Indian Pediatrics (2024)
-// - FOGSI/IAP guidance on vaccination in pregnancy
-// - General adult/geriatric immunization guidance (India currently has no
-//   single official government adult schedule — flagged where relevant)
+// tier: 'free' (govt UIP, no cost), 'recommended' (IAP/medical-society,
+// usually private), or 'situational' (travel/outbreak/risk-based).
 //
-// `tier` marks whether a vaccine is: 'free' (given at no cost through the
-// government UIP), 'recommended' (IAP/medical-society recommended, usually
-// via private healthcare), or 'situational' (travel/outbreak/risk-based).
-//
-// This is general reference information, not personalised medical advice —
-// see the disclaimer shown on the Vaccinations page.
+// General reference only, not personalised medical advice — see the
+// disclaimer on the Vaccinations page.
 export const vaccinationSchedule = [
   {
     stage: 'At Birth',

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Activity, Mail, LifeBuoy } from 'lucide-react'
+import { Mail, LifeBuoy } from 'lucide-react'
+import BrandGlyph from './BrandGlyph'
 
 const ADMIN_EMAIL = 'mediversehelp@gmail.com'
 const MAILTO_HREF = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent('MediVerse Support Request')}`
@@ -15,7 +16,7 @@ export default function Footer() {
                 className="flex h-6 w-6 items-center justify-center rounded-md"
                 style={{ background: 'var(--brand)', color: 'var(--brand-on)' }}
               >
-                <Activity size={14} strokeWidth={2.5} />
+                <BrandGlyph size={15} />
               </span>
               MediVerse
             </div>

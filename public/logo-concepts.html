@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --teal-a:#0e7c6b; --teal-b:#0a5a4e; --rose:#ff6b84; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#eef2f1; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; color:#0b1f1c; padding:40px 44px; }
+  h1 { font-size:30px; letter-spacing:-0.02em; margin:0 0 4px; }
+  p.sub { color:#5a6b67; margin:0 0 30px; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:26px 24px; }
+  .cell { text-align:center; }
+  .tile {
+    width:150px; height:150px; margin:0 auto 12px;
+    border-radius:34px;
+    background:linear-gradient(150deg,var(--teal-a),var(--teal-b));
+    box-shadow:0 10px 26px -10px rgba(10,60,52,.55), inset 0 1px 0 rgba(255,255,255,.15);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tile svg { width:112px; height:112px; }
+  .num { font-weight:800; font-size:14px; }
+  .name { color:#33524c; font-size:13px; margin-top:1px; }
+  .note { color:#7c8d89; font-size:11.5px; margin-top:2px; line-height:1.35; }
+</style>
+</head>
+<body>
+  <h1>MediVerse — logo concepts</h1>
+  <p class="sub">Medi (pulse · care) fused with Verse (universe · orbit · a connected world). Shown as the app icon, in your teal + ECG-rose palette.</p>
+  <div class="grid">
+
+    <!-- 1 Pulse Orbit -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="50" cy="50" r="33" stroke-width="4.5" opacity="0.5"/>
+        <path d="M15 55 H39 l4 -20 l6 38 l5 -28 l4 10 H85" stroke-width="6.5"/>
+      </svg></div>
+      <div class="num">1 · Pulse Orbit</div>
+      <div class="note">Heartbeat inside an orbit ring</div>
+    </div>
+
+    <!-- 2 Orbit Cross -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="50" cy="50" rx="40" ry="15" stroke-width="4" opacity="0.6" transform="rotate(-25 50 50)"/>
+        <path d="M50 28 V72 M28 50 H72" stroke-width="11"/>
+      </svg></div>
+      <div class="num">2 · Orbit Cross</div>
+      <div class="note">Medical + on a planet's orbit</div>
+    </div>
+
+    <!-- 3 Signal Cross -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 26 V74 M26 50 H74" stroke="#fff" stroke-width="11"/>
+        <path d="M14 50 H34 l4 -14 l6 26 l5 -18 l4 6 H86" stroke="#ff6b84" stroke-width="5.5"/>
+      </svg></div>
+      <div class="num">3 · Signal Cross</div>
+      <div class="note">Live pulse across the care cross</div>
+    </div>
+
+    <!-- 4 M-Pulse Monogram -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 76 V32 L40 32 L46 54 L50 42 L54 62 L60 32 L78 32 V76"/>
+      </svg></div>
+      <div class="num">4 · M-Pulse</div>
+      <div class="note">The letter M with a heartbeat</div>
+    </div>
+
+    <!-- 5 Care Constellation -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M30 32 L50 50 L70 32 M50 50 L50 76" stroke="#fff" stroke-width="2.6" opacity="0.75"/>
+        <circle cx="30" cy="30" r="5.5" fill="#fff"/>
+        <circle cx="70" cy="30" r="5.5" fill="#fff"/>
+        <circle cx="50" cy="78" r="5.5" fill="#fff"/>
+        <circle cx="50" cy="50" r="8" fill="#fff"/>
+        <path d="M75 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z" fill="#ff6b84"/>
+      </svg></div>
+      <div class="num">5 · Care Constellation</div>
+      <div class="note">A network of care, as stars</div>
+    </div>
+
+    <!-- 6 Orbiting Heart -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="50" cy="50" rx="42" ry="15" stroke="#fff" stroke-width="3.4" opacity="0.55" transform="rotate(28 50 50)"/>
+        <path d="M50 70 C33 55 25 43 33 34 C40 27 50 32 50 40 C50 32 60 27 67 34 C75 43 67 55 50 70 Z" fill="#fff"/>
+        <circle cx="83" cy="41" r="4.6" fill="#ff6b84"/>
+      </svg></div>
+      <div class="num">6 · Orbiting Heart</div>
+      <div class="note">Care at the centre of its universe</div>
+    </div>
+
+    <!-- 7 Medi Sphere (pill + ring) -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round">
+        <ellipse cx="50" cy="52" rx="43" ry="14" stroke="#fff" stroke-width="3.4" opacity="0.55" transform="rotate(18 50 50)"/>
+        <g transform="rotate(-32 50 50)">
+          <rect x="35" y="24" width="30" height="52" rx="15" fill="#fff"/>
+          <line x1="35" y1="50" x2="65" y2="50" stroke="#0e7c6b" stroke-width="3.2"/>
+        </g>
+      </svg></div>
+      <div class="num">7 · Medi Sphere</div>
+      <div class="note">Reads as a pill and a planet</div>
+    </div>
+
+    <!-- 8 Guiding Pulse Pin -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 18 C35 18 25 30 25 44 C25 63 50 84 50 84 C50 84 75 63 75 44 C75 30 65 18 50 18 Z" fill="#fff"/>
+        <path d="M33 45 H41 l3 -9 l4 16 l3 -9 H67" stroke="#ff6b84" stroke-width="4.2"/>
+      </svg></div>
+      <div class="num">8 · Guiding Pulse Pin</div>
+      <div class="note">Find a hospital, with a pulse</div>
+    </div>
+
+    <!-- 9 Pulse Bloom -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-linecap="round">
+        <path d="M38 30 A26 26 0 0 0 38 70" stroke-width="5"/>
+        <path d="M62 30 A26 26 0 0 1 62 70" stroke-width="5"/>
+        <path d="M28 22 A38 38 0 0 0 28 78" stroke-width="4" opacity="0.5"/>
+        <path d="M72 22 A38 38 0 0 1 72 78" stroke-width="4" opacity="0.5"/>
+        <circle cx="50" cy="50" r="6.5" fill="#ff6b84"/>
+      </svg></div>
+      <div class="num">9 · Pulse Bloom</div>
+      <div class="note">Care rippling outward to everyone</div>
+    </div>
+
+    <!-- 10 Vital Star -->
+    <div class="cell">
+      <div class="tile"><svg viewBox="0 0 100 100" fill="none" stroke-linejoin="round">
+        <path d="M50 14 C53 38 62 47 86 50 C62 53 53 62 50 86 C47 62 38 53 14 50 C38 47 47 38 50 14 Z" fill="#fff"/>
+        <path d="M78 66 c1.4 8 3 9.6 11 11 c-8 1.4 -9.6 3 -11 11 c-1.4 -8 -3 -9.6 -11 -11 c8 -1.4 9.6 -3 11 -11 z" fill="#ff6b84"/>
+      </svg></div>
+      <div class="num">10 · Vital Star</div>
+      <div class="note">A north star for your health</div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -12,10 +12,8 @@ export default function AdminSupport() {
 
   const refresh = useCallback(() => setReports(readReports()), [])
 
-  // Keep the list live rather than only reading once on mount:
-  //  - `mediverse:report` fires when a report is filed in THIS tab
-  //  - `storage` fires when one is filed in ANOTHER tab of the same browser
-  //  - focus covers coming back to the tab after submitting elsewhere
+  // Keep the list live: `mediverse:report` = filed in this tab,
+  // `storage` = filed in another tab, focus = returning to this tab.
   useEffect(() => {
     window.addEventListener('mediverse:report', refresh)
     window.addEventListener('storage', refresh)
@@ -37,7 +35,7 @@ export default function AdminSupport() {
 
   return (
     <div className="space-y-4">
-      {/* The honest bit: where reports really go, and what this list is. */}
+      {/* Where reports actually go, and what this local list is. */}
       <div className="card p-5">
         <h2 className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
           <Mail size={16} style={{ color: 'var(--brand)' }} /> Where reports are delivered
@@ -141,7 +139,7 @@ export default function AdminSupport() {
                       <p className="mt-0.5 flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                         <UserRound size={11} />
                         {r.submittedBy
-                          ? `${r.submittedBy.name ? `${r.submittedBy.name} · ` : ''}${r.submittedBy.phone}`
+                          ? `${r.submittedBy.name ? `${r.submittedBy.name} · ` : ''}${r.submittedBy.email}`
                           : 'Signed-out visitor'}
                       </p>
                     </div>

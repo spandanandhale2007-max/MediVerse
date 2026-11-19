@@ -47,7 +47,7 @@ export default function AdminDoctors() {
     <div className="space-y-4">
       <p
         className="flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-xs"
-        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: '#9a6a00' }}
+        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: 'var(--warn-fg)' }}
       >
         <AlertTriangle size={14} className="mt-0.5 shrink-0" strokeWidth={2.5} />
         <span>

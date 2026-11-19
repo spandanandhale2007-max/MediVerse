@@ -48,7 +48,7 @@ export default function AdminHospitals() {
 
   return (
     <div className="space-y-4">
-      {/* ------------------------------------------------------- toolbar */}
+      {/* toolbar */}
       <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -210,7 +210,7 @@ export function EditForm({ record, fields, onCancel, onSave }) {
     >
       <p
         className="mb-3 flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: '#9a6a00' }}
+        style={{ background: 'color-mix(in srgb, var(--status-warning) 16%, transparent)', color: 'var(--warn-fg)' }}
       >
         <AlertTriangle size={13} className="mt-0.5 shrink-0" strokeWidth={2.5} />
         Edits are stored in this browser only and override the shipped data file. Use Revert to drop them.

@@ -1,19 +1,14 @@
 import { useId, useRef, useState } from 'react'
 import { Lock, Eye, EyeOff, ArrowBigUp } from 'lucide-react'
 
-// Reusable password field with a show/hide toggle. Use this for EVERY password
-// input rather than a bare <input type="password"> so the behaviour stays
-// consistent as more are added.
-//
-// Details that matter and are easy to get wrong:
-//  - type="button" on the toggle, or it submits the form
-//  - focus and caret position are restored after toggling, so revealing the
-//    password mid-typing doesn't send the cursor to the end
-//  - the toggle is not in the tab order by default (tabIndex -1): keyboard
-//    users tabbing from the field expect to reach the submit button next, and
-//    the control is still reachable by click and announced to screen readers
-//  - Caps Lock warning, because a capitalised password failing silently is
-//    one of the most common sign-in frustrations there is
+// Password field with show/hide toggle. Use for EVERY password input, not a
+// bare <input type="password">, to keep behaviour consistent.
+// Easy-to-miss details:
+//  - type="button" on the toggle, else it submits the form
+//  - caret is restored on toggle, so revealing mid-typing keeps the cursor
+//  - toggle is out of tab order (tabIndex -1) so keyboard users reach submit
+//    next; still clickable and announced to screen readers
+//  - Caps Lock warning, since a mis-cased password fails silently otherwise
 export default function PasswordInput({
   value,
   onChange,
@@ -35,7 +30,7 @@ export default function PasswordInput({
     const start = el?.selectionStart
     const end = el?.selectionEnd
     setVisible((v) => !v)
-    // Restore the caret after React swaps the input type.
+    // Restore caret after React swaps the input type.
     requestAnimationFrame(() => {
       if (!el) return
       el.focus()
@@ -43,8 +38,8 @@ export default function PasswordInput({
         try {
           el.setSelectionRange(start, end)
         } catch {
-          // Some browsers refuse setSelectionRange on certain input types —
-          // focus alone is still the right outcome.
+          // Some browsers reject setSelectionRange on some input types;
+          // focus alone is fine.
         }
       }
     })
@@ -96,7 +91,7 @@ export default function PasswordInput({
       </div>
 
       {capsOn && (
-        <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: '#9a6a00' }}>
+        <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: 'var(--warn-fg)' }}>
           <ArrowBigUp size={13} strokeWidth={2.5} /> Caps Lock is on
         </p>
       )}

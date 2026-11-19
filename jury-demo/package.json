@@ -1,0 +1,11 @@
+{
+  "name": "mediverse-core-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MediVerse core logic, extracted to run in a terminal. No dependencies.",
+  "type": "module",
+  "scripts": {
+    "start": "node run.js",
+    "ask": "node ask.js"
+  }
+}
